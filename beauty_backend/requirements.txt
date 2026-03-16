@@ -1,6 +1,7 @@
 # API Framework
 fastapi==0.115.12
 uvicorn[standard]==0.32.1
+python-multipart>=0.0.20    # Required for file uploads (UploadFile)
 pydantic==2.10.3
 pydantic-settings==2.7.0
 

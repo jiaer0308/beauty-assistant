@@ -170,7 +170,7 @@ class SeasonalColorClassifier:
         """Initialize classifier with thresholds"""
         # Value (Lightness) thresholds
         self.LIGHT_THRESHOLD = 65      # (Adjusted) L > 65 = light
-        self.DARK_THRESHOLD = 35       # (Adjusted) L < 35 = dark
+        self.DARK_THRESHOLD = 42      # (Adjusted) L < 35 = dark
         
         # Chroma thresholds
         self.HIGH_CHROMA = 28          # (Adjusted) C* > 28 = high

@@ -287,7 +287,7 @@ def get_skin_temperature_label(lab_a: float, lab_b: float) -> str:
     # 如果 b 是 a 的 1.5 倍以上，通常是暖皮
     ratio = lab_b / max(lab_a, 0.1) # 避免除以0
     
-    if ratio > 1.8:
+    if ratio > 1.743:
         return "warm" # 明显的黄调
     elif ratio < 1.2:
         return "cool" # 明显的粉调

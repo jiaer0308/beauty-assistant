@@ -56,6 +56,13 @@ class SeasonResult:
     timestamp: datetime = field(default_factory=datetime.now)
     """Timestamp when analysis was performed"""
     
+    # ========== Optional Alignment Metadata ==========
+    rotation_angle: float = 0.0
+    """Face rotation angle detected (degrees)"""
+    
+    face_bbox: tuple = (0, 0, 0, 0)
+    """Face bounding box in original image (x, y, w, h)"""
+    
     def __post_init__(self):
         """Validate entity after initialization"""
         # Validate confidence
@@ -67,8 +74,8 @@ class SeasonResult:
             raise ValueError(f"Contrast score must be between 0 and 100, got {self.contrast_score}")
         
         # Validate skin temperature
-        if self.skin_temperature not in ["warm", "cool"]:
-            raise ValueError(f"Skin temperature must be 'warm' or 'cool', got {self.skin_temperature}")
+        if self.skin_temperature not in ["warm", "cool", "neutral"]:
+            raise ValueError(f"Skin temperature must be 'warm', 'cool', or 'neutral', got {self.skin_temperature}")
         
         # Validate RGB colors
         for color_name, color in [
