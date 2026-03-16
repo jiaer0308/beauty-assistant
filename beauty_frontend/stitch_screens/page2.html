@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "taupe": "#4a4138",
+                        "oatmeal": "#d4caba",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "sans": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Skin Care Quiz</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-taupe dark:text-slate-100">
+<div class="relative flex h-screen w-full flex-col overflow-hidden max-w-md mx-auto">
+<!-- Top Navigation -->
+<header class="p-6 pb-2">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-taupe dark:text-slate-100">arrow_back</span>
+</button>
+<div class="mt-6">
+<p class="text-[10px] uppercase tracking-widest font-bold text-taupe/70 dark:text-slate-400 mb-3">STEP 2 OF 9</p>
+<!-- Custom Segmented Progress Bar -->
+<div class="flex gap-1 h-1 w-full">
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal/40 dark:bg-oatmeal/20 rounded-full"></div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-6 pt-8 overflow-y-auto pb-32">
+<h1 class="font-serif text-3xl text-taupe dark:text-slate-100 leading-tight mb-3">
+                How does your skin react to the sun?
+            </h1>
+<p class="font-sans text-base text-taupe/80 dark:text-slate-300 mb-10">
+                Think about your natural skin without sunscreen.
+            </p>
+<!-- Quiz Options -->
+<div class="space-y-4">
+<!-- Option 1 -->
+<div class="relative flex items-center p-5 bg-white dark:bg-slate-800 border border-oatmeal dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="font-sans text-base font-medium text-taupe dark:text-slate-200">Burn easily, rarely tan</span>
+</div>
+<!-- Option 2 (Selected) -->
+<div class="relative flex items-center justify-between p-5 bg-white dark:bg-slate-800 border-2 border-primary rounded-2xl shadow-sm transition-all cursor-pointer">
+<span class="font-sans text-base font-semibold text-taupe dark:text-slate-200">Burn first, then tan</span>
+<div class="flex items-center justify-center bg-primary rounded-full p-0.5">
+<span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings: 'FILL' 1, 'wght' 600;">check</span>
+</div>
+</div>
+<!-- Option 3 -->
+<div class="relative flex items-center p-5 bg-white dark:bg-slate-800 border border-oatmeal dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="font-sans text-base font-medium text-taupe dark:text-slate-200">Tan easily, rarely burn</span>
+</div>
+</div>
+<!-- Aesthetic Image Accent -->
+<div class="mt-12 opacity-40 grayscale-[20%]">
+<img alt="Clean minimalist cosmetic bottles on neutral background" class="w-full h-40 object-cover rounded-xl" data-alt="Aesthetic minimalist beauty product bottles" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBepG8_IqS04x3mHDcgW7228oZedUKVtpFcOtTlr-YTL62az0G4HijkfY0hcdZgq_SoOatB7P_-kQjQgyvpTlawSgKA5tuCpI0N0gzAjufYJ76iHHukNPdd_-ueZyDojO-40P8-XFdsI6d21MUha35XDmik-PcukhJf0RjpJCLMWVAe2VKuc5uOMrfSXXIE6bJcCleSoa3F2y8gIiibINg7uOnD3KfYbO620qgEV4hudj-DDQ9RtdM09L6NiKZA6Ro1YbTlRCieLMLb"/>
+</div>
+</main>
+<!-- Footer Button -->
+<footer class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/95 dark:via-background-dark/95 to-transparent">
+<button class="w-full bg-primary hover:bg-primary/90 text-taupe font-sans font-bold py-4 rounded-full transition-all shadow-lg shadow-primary/20 active:scale-[0.98]">
+                Next
+            </button>
+</footer>
+</div>
+</body></html>

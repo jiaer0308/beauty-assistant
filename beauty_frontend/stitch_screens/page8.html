@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                        "deep-taupe": "#4a4138",
+                        "oatmeal": "#e7ddd0",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-deep-taupe min-h-screen flex flex-col">
+<!-- Header Section -->
+<header class="pt-6 px-6 pb-2">
+<div class="flex items-center mb-6">
+<button aria-label="Go back" class="text-deep-taupe dark:text-slate-100 p-0">
+<span class="material-symbols-outlined text-3xl">arrow_back</span>
+</button>
+</div>
+<p class="text-deep-taupe/70 text-xs font-bold tracking-widest uppercase mb-3">Step 7 of 9</p>
+<!-- Segmented Progress Bar -->
+<div class="flex gap-1 h-1.5 w-full mb-8">
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-oatmeal dark:bg-oatmeal/20 rounded-full"></div>
+<div class="flex-1 bg-oatmeal dark:bg-oatmeal/20 rounded-full"></div>
+</div>
+<h1 class="text-3xl font-bold leading-tight mb-8">What makeup finish do you love the most?</h1>
+</header>
+<!-- Content / Options -->
+<main class="flex-grow px-6 pb-24">
+<div class="flex flex-col gap-4">
+<!-- Option 1 -->
+<div class="group relative flex items-center justify-between p-5 bg-white dark:bg-stone-800 border border-oatmeal dark:border-stone-700 rounded-xl transition-all hover:shadow-md cursor-pointer">
+<div class="flex flex-col gap-1 pr-4">
+<h3 class="font-display text-lg font-bold text-deep-taupe dark:text-slate-100">Matte / Velvet</h3>
+<p class="text-deep-taupe/60 dark:text-slate-400 text-sm leading-snug">A shine-free, velvety smooth finish for all-day wear.</p>
+</div>
+<div class="shrink-0 w-20 h-20 rounded-lg bg-cover bg-center" data-alt="Model with matte velvet makeup finish" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBdCURjp485vDPZq8FHlcKT3heFdwQR38QdrNqu0KJY5DEAnC_4fIJf9H7nurKk5s75L0zkku-dxjr-JaC1hGhEo7zE70EJJ47xLn01ilTcfURgmIa8002teTaK7KMsMMgDsipe6RLkk62w2GM6IWGbS6WfcELEsCd79LTrjarcP2noW7MCskheB42zZbn2YWPOSLo0szxMGC4Hf6O0Zur3S044gkbdY43pVWFSAcmWFCgyB1CZFV1zHK8TByYoCy1Z1vxDW_ygo6gL')"></div>
+</div>
+<!-- Option 2 -->
+<div class="group relative flex items-center justify-between p-5 bg-white dark:bg-stone-800 border border-oatmeal dark:border-stone-700 rounded-xl transition-all hover:shadow-md cursor-pointer">
+<div class="flex flex-col gap-1 pr-4">
+<h3 class="font-display text-lg font-bold text-deep-taupe dark:text-slate-100">Dewy / Glowy</h3>
+<p class="text-deep-taupe/60 dark:text-slate-400 text-sm leading-snug">Luminous, hydrated skin with a fresh-from-the-spa radiance.</p>
+</div>
+<div class="shrink-0 w-20 h-20 rounded-lg bg-cover bg-center" data-alt="Model with dewy glowy luminous skin" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMLQwp0c3tk9bTrxJsYHnGCBR24TO-4LOGV2-6PrX-j7ePM34FMdEI4UQzsJqZDtJk2JLwyBrMe9lpd6bIyHc4ktWhGbA0ktxhsxqviETXDCw8cJ_9QyyyaVhsMKg9TBm2LV1-2SdI2N3GGiJlBR0l5a0i-lP2OVDHK3YVT7w39_9LlAotOubZVWAPWMOJZgU_Lc7lCiztttgJ9xYwuyuiff37Y_wtH5UAUW_VI1k3X1uqwHzIgQzXlbYRKHhd9vcMZxX_MGzHzF8Z')"></div>
+</div>
+<!-- Option 3: Selected -->
+<div class="group relative flex items-center justify-between p-5 bg-white dark:bg-stone-800 border-2 border-primary rounded-xl shadow-sm cursor-pointer ring-1 ring-primary/20">
+<div class="flex flex-col gap-1 pr-4">
+<div class="flex items-center gap-2">
+<h3 class="font-display text-lg font-bold text-deep-taupe dark:text-slate-100">Satin / Natural</h3>
+<span class="material-symbols-outlined text-primary fill-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-deep-taupe/60 dark:text-slate-400 text-sm leading-snug">The best of both worlds—looks just like real, healthy skin.</p>
+</div>
+<div class="shrink-0 w-20 h-20 rounded-lg bg-cover bg-center" data-alt="Model with satin natural skin finish" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuASNWdGvW4DjD7YasQQKt84JMTe_OvFBEg7VmEStfHMkln_do-D_YHm2bssJxg44CuwSHg_peB98-GAJ-6iJDrt2Rb8dUhi1ebB3EAsUNn9oTTANNonUIf0EF8OiJH4NC0xRjlIFN-dorSF2G-fGkJ5PRGlQD4S4RQQ1VpIfaM9v4sV7LR_z3dbvOvBZmc0jwRFc-vGrL6JTn_xAfnQBOe8Y_g5PjY5JDrvc75zIEEceQMQvlA4oGxKIORD6PA0sUwZANRZyqTf8gDp')"></div>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-6 border-t border-oatmeal/30">
+<button class="w-full bg-primary hover:bg-primary/90 text-deep-taupe font-display font-bold py-4 rounded-full transition-transform active:scale-[0.98] shadow-lg shadow-primary/20">
+            Next
+        </button>
+</footer>
+</body></html>

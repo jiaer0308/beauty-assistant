@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Playfair+Display:wght@700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                        "deep-taupe": "#4a4138",
+                        "oatmeal": "#d4caba",
+                        "pearl-white": "#faf8f5"
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .progress-segment {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-deep-taupe selection:bg-primary/30">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-pearl-white">
+<!-- Header Section -->
+<header class="p-4 pt-6">
+<button class="mb-6 flex items-center justify-center size-10 rounded-full hover:bg-oatmeal/20 transition-colors">
+<span class="material-symbols-outlined text-deep-taupe">arrow_back</span>
+</button>
+<div class="flex flex-col gap-3">
+<p class="text-xs font-bold tracking-widest uppercase text-deep-taupe/80">Step 3 of 9</p>
+<div class="flex gap-1.5 w-full">
+<!-- Progress Segments -->
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+</div>
+</div>
+</header>
+<!-- Body Content -->
+<main class="flex-1 px-4 pt-4 pb-24">
+<h1 class="font-serif text-3xl md:text-4xl text-deep-taupe leading-tight mb-3">
+                What color are your wrist veins?
+            </h1>
+<p class="text-deep-taupe/70 text-base mb-8">
+                Check the inside of your wrist in natural daylight.
+            </p>
+<div class="grid grid-cols-1 gap-4">
+<!-- Card 1 -->
+<div class="relative group cursor-pointer bg-white rounded-[16px] border border-oatmeal p-4 flex items-center gap-4 transition-all hover:shadow-sm">
+<div class="size-20 rounded-lg shrink-0 bg-gradient-to-br from-blue-400 to-purple-400" data-alt="Abstract soft blue and purple color gradient"></div>
+<span class="font-semibold text-deep-taupe text-lg">Blue or Purple</span>
+</div>
+<!-- Card 2 (SELECTED) -->
+<div class="relative group cursor-pointer bg-white rounded-[16px] border-2 border-primary p-4 flex items-center gap-4 shadow-md">
+<div class="size-20 rounded-lg shrink-0 bg-gradient-to-br from-green-400 to-olive-500" data-alt="Abstract soft green and olive color gradient" style="background-image: linear-gradient(135deg, #a7c957 0%, #6a994e 100%);"></div>
+<span class="font-semibold text-deep-taupe text-lg">Green or Olive</span>
+<div class="absolute top-4 right-4 bg-primary rounded-full size-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm font-bold">check</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="relative group cursor-pointer bg-white rounded-[16px] border border-oatmeal p-4 flex items-center gap-4 transition-all hover:shadow-sm">
+<div class="size-20 rounded-lg shrink-0 bg-gradient-to-br from-stone-300 via-gray-300 to-taupe-300" data-alt="Abstract soft mixed muted tones gradient" style="background-image: linear-gradient(135deg, #d4caba 0%, #a39c94 100%);"></div>
+<span class="font-semibold text-deep-taupe text-lg">Mixed / Unsure</span>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-pearl-white/80 backdrop-blur-md p-4 border-t border-oatmeal/20">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-full transition-all shadow-lg active:scale-[0.98]">
+                Next
+            </button>
+</footer>
+</div>
+</body></html>

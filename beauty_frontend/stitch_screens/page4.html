@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Beauty App Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                        "taupe": "#4a4138",
+                        "oatmeal": "#d4caba"
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .hair-texture-black {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+        }
+        .hair-texture-brown {
+            background: linear-gradient(135deg, #634e34 0%, #3d2b1f 100%);
+        }
+        .hair-texture-ash {
+            background: linear-gradient(135deg, #c7baab 0%, #8e8271 100%);
+        }
+        .hair-texture-blonde {
+            background: linear-gradient(135deg, #eec07b 0%, #d4a356 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-taupe antialiased">
+<div class="relative flex min-h-screen flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-xl">
+<!-- Header -->
+<header class="pt-6 px-6">
+<div class="flex items-center mb-6">
+<button class="p-2 -ml-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-taupe dark:text-slate-100">arrow_back</span>
+</button>
+</div>
+<p class="text-[10px] tracking-widest font-bold uppercase text-taupe dark:text-slate-300 opacity-80">STEP 4 OF 9</p>
+<!-- Segmented Progress Bar -->
+<div class="flex gap-1 mt-3 h-1 w-full">
+<!-- Completed Steps (1-4) -->
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<!-- Remaining Steps (5-9) -->
+<div class="flex-1 bg-oatmeal rounded-full opacity-40"></div>
+<div class="flex-1 bg-oatmeal rounded-full opacity-40"></div>
+<div class="flex-1 bg-oatmeal rounded-full opacity-40"></div>
+<div class="flex-1 bg-oatmeal rounded-full opacity-40"></div>
+<div class="flex-1 bg-oatmeal rounded-full opacity-40"></div>
+</div>
+</header>
+<!-- Body Content -->
+<main class="flex-1 px-6 pt-10 pb-32">
+<h1 class="font-serif text-3xl font-bold text-taupe dark:text-slate-100 leading-tight mb-3">
+                What is your natural hair color?
+            </h1>
+<p class="text-base text-taupe/70 dark:text-slate-400 font-normal leading-relaxed mb-10">
+                Select the shade closest to your un-dyed roots.
+            </p>
+<!-- 2x2 Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Option 1 -->
+<div class="relative group cursor-pointer">
+<div class="aspect-square w-full rounded-lg hair-texture-black mb-3 transition-transform active:scale-95 shadow-sm" data-alt="Dark midnight black silky hair texture gradient"></div>
+<p class="text-sm font-semibold text-center">Black</p>
+</div>
+<!-- Option 2: Selected -->
+<div class="relative group cursor-pointer">
+<div class="aspect-square w-full rounded-lg hair-texture-brown mb-3 border-[2px] border-primary ring-4 ring-primary/10 transition-transform active:scale-95 shadow-md relative" data-alt="Rich warm walnut brown hair texture gradient">
+<div class="absolute top-2 right-2 bg-primary rounded-full p-1 shadow-sm">
+<span class="material-symbols-outlined text-white text-[16px] block font-bold">check</span>
+</div>
+</div>
+<p class="text-sm font-bold text-center text-taupe">Warm Brown</p>
+</div>
+<!-- Option 3 -->
+<div class="relative group cursor-pointer">
+<div class="aspect-square w-full rounded-lg hair-texture-ash mb-3 transition-transform active:scale-95 shadow-sm" data-alt="Cool ashy sand blonde hair texture gradient"></div>
+<p class="text-sm font-semibold text-center">Ashy Blonde</p>
+</div>
+<!-- Option 4 -->
+<div class="relative group cursor-pointer">
+<div class="aspect-square w-full rounded-lg hair-texture-blonde mb-3 transition-transform active:scale-95 shadow-sm" data-alt="Sun-kissed golden honey hair texture gradient"></div>
+<p class="text-sm font-semibold text-center">Golden Blonde</p>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-6 border-t border-oatmeal/20">
+<button class="w-full bg-primary hover:bg-primary/90 text-taupe font-bold py-4 rounded-full transition-all active:scale-[0.98] shadow-lg shadow-primary/20 text-lg">
+                Next
+            </button>
+</footer>
+</div>
+</body></html>

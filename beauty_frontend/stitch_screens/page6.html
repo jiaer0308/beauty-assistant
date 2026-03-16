@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                        "deep-taupe": "#4a4138",
+                        "oatmeal": "#d4caba",
+                        "pearl": "#faf8f5"
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "button": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .progress-segment { height: 4px; flex: 1; border-radius: 2px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-deep-taupe min-h-screen flex flex-col">
+<!-- Header Section -->
+<header class="p-4 pt-6">
+<div class="flex items-center mb-6">
+<button class="text-deep-taupe hover:bg-primary/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<div class="px-2">
+<p class="text-[10px] tracking-widest font-bold uppercase mb-3 text-deep-taupe/70">Step 6 of 9</p>
+<div class="flex gap-1.5 w-full">
+<!-- Segments 1-6: Champagne Gold -->
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<!-- Segments 7-9: Oatmeal -->
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow px-6 pt-8 pb-32">
+<h1 class="font-serif text-3xl leading-tight mb-10 text-deep-taupe">
+            What is your preferred foundation coverage?
+        </h1>
+<div class="space-y-4">
+<!-- Option 1: Selected -->
+<div class="relative flex items-center justify-between p-5 bg-white border-2 border-primary rounded-2xl shadow-sm cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">water_drop</span>
+</div>
+<div>
+<p class="text-lg font-bold text-deep-taupe">Sheer / Light</p>
+<p class="text-sm text-deep-taupe/60">A natural, breathable finish</p>
+</div>
+</div>
+<div class="text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">check_circle</span>
+</div>
+</div>
+<!-- Option 2: Normal -->
+<div class="flex items-center justify-between p-5 bg-white border border-oatmeal rounded-2xl shadow-sm hover:border-primary/50 cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-oatmeal/20 flex items-center justify-center text-deep-taupe/40">
+<span class="material-symbols-outlined text-2xl">brush</span>
+</div>
+<div>
+<p class="text-lg font-bold text-deep-taupe">Medium</p>
+<p class="text-sm text-deep-taupe/60">Even skin tone with builds</p>
+</div>
+</div>
+</div>
+<!-- Option 3: Normal -->
+<div class="flex items-center justify-between p-5 bg-white border border-oatmeal rounded-2xl shadow-sm hover:border-primary/50 cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-oatmeal/20 flex items-center justify-center text-deep-taupe/40">
+<span class="material-symbols-outlined text-2xl">layers</span>
+</div>
+<div>
+<p class="text-lg font-bold text-deep-taupe">Full</p>
+<p class="text-sm text-deep-taupe/60">Complete flawless coverage</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="mt-12 opacity-20">
+<div class="w-full h-40 rounded-xl bg-gradient-to-br from-primary via-oatmeal to-pearl" data-alt="Abstract soft creamy texture gradient pattern"></div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-pearl/80 backdrop-blur-md border-t border-oatmeal/30">
+<button class="w-full bg-primary text-deep-taupe font-button text-lg py-4 rounded-full shadow-lg hover:brightness-95 active:scale-[0.98] transition-all">
+            Next
+        </button>
+</footer>
+</body></html>

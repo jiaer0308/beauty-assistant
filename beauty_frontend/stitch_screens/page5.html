@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382",
+                        "background-light": "#faf8f5",
+                        "background-dark": "#211a11",
+                        "oatmeal": "#d4caba",
+                        "charcoal": "#4a4138"
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .progress-segment {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+        }
+        .silver-texture {
+            background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #b8b8b8 100%);
+        }
+        .gold-texture {
+            background: linear-gradient(135deg, #f9e29e 0%, #f3c382 50%, #d4a017 100%);
+        }
+        .rose-gold-texture {
+            background: linear-gradient(135deg, #e7b1a4 0%, #f4d0c5 50%, #d19082 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-charcoal min-h-screen flex flex-col">
+<!-- Header Section -->
+<header class="px-6 pt-8 pb-4">
+<div class="mb-6">
+<span class="material-symbols-outlined text-charcoal cursor-pointer">arrow_back</span>
+</div>
+<div class="space-y-3">
+<p class="text-[10px] font-bold tracking-widest uppercase opacity-80">Step 5 of 9</p>
+<!-- 9-Segment Progress Bar -->
+<div class="flex gap-1.5 w-full">
+<!-- Segments 1-5 (Champagne Gold) -->
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<div class="progress-segment bg-primary"></div>
+<!-- Segments 6-9 (Oatmeal) -->
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+<div class="progress-segment bg-oatmeal"></div>
+</div>
+</div>
+</header>
+<!-- Body Section -->
+<main class="flex-grow px-6 pt-4">
+<h1 class="font-serif text-3xl leading-tight mb-8">Which jewelry metal makes your skin glow?</h1>
+<!-- Selection Grid -->
+<div class="grid grid-cols-1 gap-4">
+<!-- Option 1: Selected (Silver) -->
+<div class="relative group cursor-pointer">
+<div class="silver-texture aspect-[16/9] rounded-xl border-2 border-primary shadow-sm overflow-hidden" data-alt="Smooth brushed silver metallic texture surface">
+<div class="absolute top-3 right-3 bg-primary rounded-full p-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm font-bold">check</span>
+</div>
+</div>
+<p class="mt-2 text-sm font-semibold">Silver / White Gold</p>
+</div>
+<!-- Option 2: Unselected (Yellow Gold) -->
+<div class="relative group cursor-pointer">
+<div class="gold-texture aspect-[16/9] rounded-xl border-2 border-oatmeal/30 hover:border-primary/50 transition-colors shadow-sm" data-alt="Reflective polished yellow gold metallic texture">
+</div>
+<p class="mt-2 text-sm font-semibold opacity-80">Yellow Gold</p>
+</div>
+<!-- Option 3: Unselected (Rose Gold) -->
+<div class="relative group cursor-pointer">
+<div class="rose-gold-texture aspect-[16/9] rounded-xl border-2 border-oatmeal/30 hover:border-primary/50 transition-colors shadow-sm" data-alt="Warm rose gold metallic texture with soft sheen">
+</div>
+<p class="mt-2 text-sm font-semibold opacity-80">Rose Gold</p>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="sticky bottom-0 p-6 bg-background-light/80 backdrop-blur-md">
+<button class="w-full bg-primary py-4 rounded-full text-charcoal font-bold text-base shadow-lg active:scale-[0.98] transition-transform">
+            Next
+        </button>
+<div class="h-4"></div> <!-- Safe area for navigation bars -->
+</footer>
+</body></html>

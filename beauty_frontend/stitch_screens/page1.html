@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&amp;family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#f3c482",
+                "background-light": "#faf8f5",
+                "background-dark": "#211a11",
+                "muted": "#4a4138",
+                "border-neutral": "#d4caba"
+              },
+              fontFamily: {
+                "display": ["Manrope", "sans-serif"],
+                "serif": ["Playfair Display", "serif"],
+                "plus": ["Plus Jakarta Sans", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-muted">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark">
+<!-- Header -->
+<header class="pt-6 px-6">
+<div class="flex items-center mb-6">
+<button aria-label="Go back" class="text-muted dark:text-slate-100 flex items-center justify-center -ml-2 p-2">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</button>
+</div>
+<div class="flex flex-col gap-4">
+<p class="text-muted dark:text-slate-400 text-xs font-bold tracking-[0.1em] uppercase">Step 1 of 9</p>
+<!-- Progress Bar: 9 Segments -->
+<div class="flex w-full gap-1.5 h-1">
+<div class="flex-1 rounded-full bg-primary"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+<div class="flex-1 rounded-full bg-border-neutral/40 dark:bg-slate-700"></div>
+</div>
+</div>
+</header>
+<!-- Content -->
+<main class="flex-1 px-6 pt-10 pb-32">
+<h1 class="font-serif text-[32px] leading-[1.2] text-muted dark:text-slate-100 mb-3">
+                How would you describe your natural skin type?
+            </h1>
+<p class="text-muted/70 dark:text-slate-400 text-base mb-8">
+                Select the option that best describes your skin's daily behavior.
+            </p>
+<div class="flex flex-col gap-4">
+<!-- Option: Oily (Selected) -->
+<div class="relative flex items-center justify-between p-5 bg-white dark:bg-slate-800 border-2 border-primary rounded-xl shadow-sm cursor-pointer">
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-muted dark:text-slate-100">Oily</span>
+<span class="text-sm text-muted/60 dark:text-slate-400">Shiny appearance, visible pores</span>
+</div>
+<div class="bg-primary rounded-full p-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-lg font-bold">check</span>
+</div>
+</div>
+<!-- Option: Dry -->
+<div class="flex items-center justify-between p-5 bg-white dark:bg-slate-800 border border-border-neutral/60 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-muted dark:text-slate-100">Dry</span>
+<span class="text-sm text-muted/60 dark:text-slate-400">Feels tight, occasional flaking</span>
+</div>
+</div>
+<!-- Option: Combination -->
+<div class="flex items-center justify-between p-5 bg-white dark:bg-slate-800 border border-border-neutral/60 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-muted dark:text-slate-100">Combination</span>
+<span class="text-sm text-muted/60 dark:text-slate-400">Oily T-zone, dry or normal cheeks</span>
+</div>
+</div>
+<!-- Option: Sensitive -->
+<div class="flex items-center justify-between p-5 bg-white dark:bg-slate-800 border border-border-neutral/60 dark:border-slate-700 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-lg font-semibold text-muted dark:text-slate-100">Sensitive</span>
+<span class="text-sm text-muted/60 dark:text-slate-400">Prone to redness and irritation</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark">
+<button class="w-full bg-primary hover:bg-primary/90 text-muted font-plus font-semibold text-lg py-4 rounded-full shadow-lg shadow-primary/20 transition-all active:scale-[0.98]">
+                Next
+            </button>
+</footer>
+</div>
+</body></html>

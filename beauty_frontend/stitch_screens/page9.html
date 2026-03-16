@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f3c382", // Champagne Gold
+                        "background-light": "#faf8f5", // Pearl White
+                        "background-dark": "#221610",
+                        "deep-taupe": "#4a4138",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-deep-taupe dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Navigation -->
+<header class="pt-6 px-6 pb-2">
+<div class="flex items-center mb-6">
+<span class="material-symbols-outlined text-deep-taupe dark:text-slate-100 cursor-pointer text-3xl">
+                arrow_back
+            </span>
+</div>
+<p class="text-deep-taupe/70 dark:text-slate-400 text-xs font-bold tracking-widest uppercase mb-3">
+            Step 9 of 9
+        </p>
+<!-- Progress Bar (9 segments) -->
+<div class="flex gap-1.5 h-1.5 w-full mb-8">
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+<div class="flex-1 bg-primary rounded-full"></div>
+</div>
+<h1 class="text-3xl font-bold leading-tight text-deep-taupe dark:text-slate-100 mb-8">
+            What is your go-to everyday lip style?
+        </h1>
+</header>
+<!-- Selection Grid -->
+<main class="flex-grow px-6 pb-24">
+<div class="grid grid-cols-1 gap-4">
+<!-- Selected Card: MLBB -->
+<div class="relative group cursor-pointer">
+<div class="w-full aspect-video rounded-xl overflow-hidden border-4 border-primary ring-4 ring-primary/20 bg-cover bg-center flex flex-col justify-end p-5" data-alt="Soft nude lipstick texture swatch close up" style="background-image: linear-gradient(rgba(0,0,0,0), rgba(74, 65, 56, 0.6)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrlyyjKlEbON37HKlinF8WDYG2TlJnSHE1lDO5aMGA9AT1l0rfMx8-LU9RbPRtxlggeokPYX746jzi-zipLMg8WYFN2UgF9mJzNr6PrioT-tAasakKe-dxsk95-1eDy1UBzVnMafNN-0kvg0lQZ3L2vsQGVCUPcsnjuJC2AODKktpmbAiLZx4ELUmy_-Aq4n_TPpTPshTcEUy2bXRQYLP-itJmj2Dmqk2cSbzEpVHla0MAs7vCSRNhlXEa0Y2mUXzm76o_pGp8tBDc')">
+<p class="text-white text-lg font-semibold">MLBB (Nudes/Balms)</p>
+</div>
+<!-- Checkmark Badge -->
+<div class="absolute -top-2 -right-2 bg-primary text-deep-taupe rounded-full p-1 shadow-lg flex items-center justify-center border-2 border-background-light">
+<span class="material-symbols-outlined font-bold text-xl">
+                        check
+                    </span>
+</div>
+</div>
+<!-- Card: Bold & Statement -->
+<div class="relative group cursor-pointer">
+<div class="w-full aspect-video rounded-xl overflow-hidden border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-5 grayscale-[30%] hover:grayscale-0 transition-all" data-alt="Deep red vibrant lipstick texture background" style="background-image: linear-gradient(rgba(0,0,0,0), rgba(74, 65, 56, 0.6)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGmLxrcazuHt9LvsCQoZWLU1Q07K53HkJrZfLBiA7cAyYeOg0C6taeFP1kkeeI_wc4ioEjhQfx66cgDLtmwH1q5RAk2C5n3CWdCIUomOCUBpThaxWw4h7RfhgFVzVlB1EO5S3q50SFEhL-4HAr8RhmHIZKryUdvitJZm62jVM7Ai0tlXfzuiBzNuV800PzLSIfOTISB75Ze2327x33sjQIES_qNG32lW3mkzPxHsauCgf8h-A9OrMPzIYoY11yigIE-uBVc6FaTXro')">
+<p class="text-white text-lg font-semibold">Bold &amp; Statement</p>
+</div>
+</div>
+<!-- Card: Fresh & Feminine -->
+<div class="relative group cursor-pointer">
+<div class="w-full aspect-video rounded-xl overflow-hidden border-2 border-transparent bg-cover bg-center flex flex-col justify-end p-5 grayscale-[30%] hover:grayscale-0 transition-all" data-alt="Soft pink floral and lip gloss textures" style="background-image: linear-gradient(rgba(0,0,0,0), rgba(74, 65, 56, 0.6)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuDpaLrcYGJXSC_EArKDi_S773a9xkjI7_5YOV67SQ8Hxb0CNltz7n7TQWQcGxeNlVd4DWjaCl9RAUEVWw92R4JZpiSXZEcxr8O8Cmewgplv9YnOoCIUxqBV3gFJFdJ0l8SyVf9XxNtOg4D7saTvf9fO6UOm9IPImbnppAgH0lwf0sjitXVPxLtplZBKZFJ8JbFmHK1A0FpNRnIeUhdGkupIl9EhVl0dCAy1e1MbCahsOyLtMGl5Yow32XtHUV3Cp_68wMFrX5KeeL1-')">
+<p class="text-white text-lg font-semibold">Fresh &amp; Feminine</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm p-6 border-t border-deep-taupe/5">
+<button class="w-full bg-primary hover:bg-primary/90 text-deep-taupe font-bold py-4 rounded-full text-center transition-colors shadow-md">
+            Next
+        </button>
+</footer>
+</body></html>
