@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     
+    # Security configuration
+    # Use a secure default for development, but it should be overridden via environment variables in production
+    secret_key: str = "your-super-secret-key-for-development-only"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 24 * 7  # Default to 7 days for now (flexible for prototypes)
+    
     # Model configuration
     model_dir: Path = Path(__file__).parent.parent / "ml_engine" / "data"
     bisenet_model_name: str = "bisenet_resnet34.onnx"

@@ -5,6 +5,11 @@ python-multipart>=0.0.20    # Required for file uploads (UploadFile)
 pydantic==2.10.3
 pydantic-settings==2.7.0
 
+# Security
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.0
+python-jose[cryptography]==3.3.0
+
 # Computer Vision
 opencv-python==4.8.1.78
 numpy==1.24.3
