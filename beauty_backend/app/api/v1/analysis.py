@@ -15,11 +15,19 @@ GET  /api/v1/sca/health
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException, status
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
-from app.api.deps import SCAServiceDep
+from app.api.deps import SCAServiceDep, CurrentUserDep
+from app.core.database import get_db
 from app.core.config import settings
+from app.domain.entities import (
+    Season as SeasonModel, 
+    Color as ColorModel, 
+    CosmeticProduct as CosmeticProductModel,
+    SeasonColor as SeasonColorModel
+)
 from app.schemas.sca import (
     QuizData,
     SCAResponse,
@@ -28,6 +36,10 @@ from app.schemas.sca import (
     DominantColors,
     DebugInfo,
     ErrorResponse,
+    ColorSwatch,
+    ColorPalette,
+    CosmeticProduct,
+    Recommendations,
 )
 from app.services.sca_workflow_service import ValidationError
 
@@ -73,48 +85,23 @@ async def health_check(sca_service: SCAServiceDep):
 )
 async def analyze_image(
     sca_service: SCAServiceDep,
+    current_user: CurrentUserDep,
+    db: Session = Depends(get_db),
     file: UploadFile = File(
         ...,
         description="Face photo (JPEG or PNG, max 10 MB)",
     ),
     quiz_data: str = Form(
-        ...,
-        description="Stringified JSON object matching the QuizData schema",
+        default="{}",
+        description="Stringified JSON object matching the QuizData schema (optional; send {} to omit)",
     ),
 ):
-    """
-    **Seasonal Colour Analysis**
-
-    Upload a selfie / portrait and receive the user's 12-season colour type.
-    Also accepts a `quiz_data` form field containing the user's self-reported
-    calibration answers as a stringified JSON object.
-
-    ### Processing pipeline
-    1. **Phase 0 – Validation**: lighting quality check  
-    2. **Phase 1 – Vision**: MediaPipe face alignment → BiSeNet segmentation  
-    3. **Phase 2 – Colour Engine**: K-Means extraction → CIELAB conversion  
-    4. **Phase 3 – Classification**: 12-season decision tree  
-
-    ### Flutter usage
-    ```dart
-    final quizJson = jsonEncode({
-      'skin_type': 'dry',
-      'sun_reaction': 'always_burn',
-      'vein_color': 'blue_purple',
-      'natural_hair_color': 'dark_brown',
-      'jewelry_preference': 'silver',
-    });
-    final request = http.MultipartRequest(
-      'POST', Uri.parse('$baseUrl/api/v1/sca/analyze'));
-    request.files.add(await http.MultipartFile.fromPath('file', imagePath));
-    request.fields['quiz_data'] = quizJson;
-    final response = await request.send();
-    ```
-    """
+    logger.info("Entering analyze_image endpoint")
     # ------------------------------------------------------------------ #
     # 1. Parse & validate quiz_data
     # ------------------------------------------------------------------ #
     try:
+        logger.info(f"Parsing quiz_data: {quiz_data}")
         parsed_quiz = QuizData.model_validate_json(quiz_data)
     except Exception as exc:
         logger.warning("Invalid quiz_data JSON: %s", exc)
@@ -124,13 +111,10 @@ async def analyze_image(
         )
 
     logger.info(
-        "Parsed quiz data: skin_type=%s, sun_reaction=%s, vein_color=%s, "
-        "natural_hair_color=%s, jewelry_preference=%s",
+        "User %d (%s) parsed quiz data: skin_type=%s",
+        current_user.id,
+        current_user.email or "Guest",
         parsed_quiz.skin_type,
-        parsed_quiz.sun_reaction,
-        parsed_quiz.vein_color,
-        parsed_quiz.natural_hair_color,
-        parsed_quiz.jewelry_preference,
     )
 
     # ------------------------------------------------------------------ #
@@ -156,17 +140,23 @@ async def analyze_image(
         )
 
     logger.info(
-        "Received analyze request: filename=%s, size=%d bytes, content_type=%s",
+        "Received analyze request: user_id=%d, filename=%s, size=%d bytes",
+        current_user.id,
         file.filename,
         len(image_bytes),
-        file.content_type,
     )
 
     # ------------------------------------------------------------------ #
     # 3. Run SCA pipeline
     # ------------------------------------------------------------------ #
     try:
-        result = await sca_service.analyze(image_bytes)
+        # Pass DB and user_id to service to persist history
+        result = await sca_service.analyze(
+            image_bytes=image_bytes, 
+            db=db, 
+            user_id=current_user.id, 
+            quiz_data=parsed_quiz
+        )
 
     except ValidationError as exc:
         logger.warning("Validation failed for uploaded image: %s", exc)
@@ -184,6 +174,54 @@ async def analyze_image(
     # ------------------------------------------------------------------ #
     # 4. Map domain entity → API schema
     # ------------------------------------------------------------------ #
+    # Fetch recommendations from Database if available, else fallback to JSON
+    # result.season.value is the machine name like 'soft_autumn'
+    db_season = db.query(SeasonModel).filter(SeasonModel.name == result.season.value).first()
+    
+    if db_season:
+        logger.info("Fetching recommendations from database for season: %s", db_season.name)
+        # Filter colors by category_type
+        best_colors = [
+            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
+            for sc in db_season.colors if sc.category_type == "best"
+        ]
+        neutral_colors = [
+            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
+            for sc in db_season.colors if sc.category_type == "neutral"
+        ]
+        avoid_colors = [
+            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
+            for sc in db_season.colors if sc.category_type == "avoid"
+        ]
+        
+        # Map cosmetics to schema
+        cosmetics = [
+            CosmeticProduct(
+                category=p.category.name,
+                brand=p.brand.name,
+                shade=f"{p.product_name} - {p.shade_name}",
+                hex=p.hex_code or "#000000"
+            )
+            for p in db_season.cosmetics
+        ]
+    else:
+        logger.warning("Season %s not found in DB knowledge base, falling back to JSON", result.season.value)
+        # Fallback to the recommendations already loaded in the result (from JSON)
+        recs_raw = result.recommendations or {}
+        best_colors    = [ColorSwatch(**c) for c in recs_raw.get("best_colors", [])]
+        neutral_colors = [ColorSwatch(**c) for c in recs_raw.get("neutral_colors", [])]
+        avoid_colors   = [ColorSwatch(**c) for c in recs_raw.get("avoid_colors", [])]
+        cosmetics      = [CosmeticProduct(**p) for p in recs_raw.get("cosmetics", [])]
+
+    recommendations = Recommendations(
+        color_palette=ColorPalette(
+            best=best_colors,
+            neutral=neutral_colors,
+            avoid=avoid_colors,
+        ),
+        cosmetics=cosmetics,
+    )
+
     response = SCAResponse(
         result=SeasonInfo(
             season=result.season.value,
@@ -204,6 +242,8 @@ async def analyze_image(
             processing_time_ms=result.processing_time_ms,
             rotation_angle=round(result.rotation_angle, 1),
         ),
+        recommendations=recommendations,
+        quiz_influence=result.quiz_influence,
         analyzed_at=result.timestamp,
     )
 

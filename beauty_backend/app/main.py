@@ -9,7 +9,7 @@ via a REST API designed for the Flutter mobile client.
 from contextlib import asynccontextmanager
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -82,6 +82,13 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming Request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"Response Status: {response.status_code}")
+    return response
 
 app.include_router(api_router, prefix="/api/v1")
 

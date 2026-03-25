@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7  # Default to 7 days for now (flexible for prototypes)
     
+    # Database configuration
+    database_url: str = "mysql+mysqlconnector://baDB:Panda24685l%24@www.dcs5604.com:3306/beauty_assisant"
+    
     # Model configuration
     model_dir: Path = Path(__file__).parent.parent / "ml_engine" / "data"
     bisenet_model_name: str = "bisenet_resnet34.onnx"

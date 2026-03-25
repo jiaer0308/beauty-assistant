@@ -1,0 +1,373 @@
+{
+  "deep_winter": {
+    "best_colors": [
+      {"name": "True Red",        "hex": "#C8102E"},
+      {"name": "Royal Blue",      "hex": "#002366"},
+      {"name": "Emerald Green",   "hex": "#009473"},
+      {"name": "Pure White",      "hex": "#FFFFFF"},
+      {"name": "Fuchsia",         "hex": "#C154C1"}
+    ],
+    "neutral_colors": [
+      {"name": "Charcoal",        "hex": "#36454F"},
+      {"name": "Slate Grey",      "hex": "#708090"},
+      {"name": "Navy",            "hex": "#000080"},
+      {"name": "Cool Taupe",      "hex": "#8C8277"},
+      {"name": "Dark Plum",       "hex": "#4E1F5A"}
+    ],
+    "avoid_colors": [
+      {"name": "Camel",           "hex": "#C19A6B"},
+      {"name": "Warm Beige",      "hex": "#D4B896"},
+      {"name": "Mustard Yellow",  "hex": "#E1AD21"},
+      {"name": "Coral",           "hex": "#FF7F50"},
+      {"name": "Peach",           "hex": "#FFCBA4"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",       "shade": "Ruby Woo",        "hex": "#9B111E"},
+      {"category": "Foundation",  "brand": "Armani",    "shade": "Luminous Silk 3", "hex": "#D4A882"},
+      {"category": "Eyeshadow",   "brand": "Urban Decay","shade": "Midnight Cowboy", "hex": "#2B2D42"},
+      {"category": "Blush",       "brand": "NARS",      "shade": "Deep Throat",     "hex": "#D4799B"},
+      {"category": "Eyeliner",    "brand": "Stila",     "shade": "Intense Black",   "hex": "#1A1A1A"}
+    ]
+  },
+
+  "cool_winter": {
+    "best_colors": [
+      {"name": "Ice Blue",        "hex": "#99C5C4"},
+      {"name": "Pure Black",      "hex": "#0A0A0A"},
+      {"name": "Silver",          "hex": "#C0C0C0"},
+      {"name": "Lavender",        "hex": "#967BB6"},
+      {"name": "Hot Pink",        "hex": "#FF69B4"}
+    ],
+    "neutral_colors": [
+      {"name": "Charcoal",        "hex": "#36454F"},
+      {"name": "Cool Grey",       "hex": "#9EA4AA"},
+      {"name": "Ash Brown",       "hex": "#6D6461"},
+      {"name": "Steel Blue",      "hex": "#4682B4"},
+      {"name": "Pewter",          "hex": "#96A8A1"}
+    ],
+    "avoid_colors": [
+      {"name": "Warm Gold",       "hex": "#CFB53B"},
+      {"name": "Orange",          "hex": "#FF7518"},
+      {"name": "Olive Green",     "hex": "#808000"},
+      {"name": "Rust",            "hex": "#B7410E"},
+      {"name": "Terracotta",      "hex": "#C87941"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "Charlotte Tilbury", "shade": "Pillow Talk",  "hex": "#C4848B"},
+      {"category": "Foundation",  "brand": "Fenty Beauty",      "shade": "100W",         "hex": "#E8C9A0"},
+      {"category": "Eyeshadow",   "brand": "Charlotte Tilbury", "shade": "Smokey Eye",   "hex": "#444444"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Orgasm",       "hex": "#D08080"},
+      {"category": "Eyeliner",    "brand": "Bobbi Brown",       "shade": "Navy",         "hex": "#002244"}
+    ]
+  },
+
+  "clear_winter": {
+    "best_colors": [
+      {"name": "Ice Pink",        "hex": "#FFB7D5"},
+      {"name": "Electric Blue",   "hex": "#007FFF"},
+      {"name": "Bright Magenta",  "hex": "#CA1F7B"},
+      {"name": "True White",      "hex": "#FDFDFD"},
+      {"name": "Deep Teal",       "hex": "#008080"}
+    ],
+    "neutral_colors": [
+      {"name": "Crisp Grey",      "hex": "#B0B7BC"},
+      {"name": "Black",           "hex": "#0A0A0A"},
+      {"name": "Cool Pink Beige", "hex": "#DEB8C0"},
+      {"name": "Medium Navy",     "hex": "#1C3A5E"},
+      {"name": "Graphite",        "hex": "#44494E"}
+    ],
+    "avoid_colors": [
+      {"name": "Camel",           "hex": "#C19A6B"},
+      {"name": "Warm Tan",        "hex": "#C4A882"},
+      {"name": "Harvest Gold",    "hex": "#DA9100"},
+      {"name": "Moss Green",      "hex": "#8A9A5B"},
+      {"name": "Muted Mauve",     "hex": "#A08080"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",       "shade": "Candy Yum Yum",  "hex": "#E52B87"},
+      {"category": "Foundation",  "brand": "Armani",    "shade": "Luminous Silk 2", "hex": "#DDBC9C"},
+      {"category": "Eyeshadow",   "brand": "Pat McGrath","shade": "Crystal Clear",  "hex": "#C2D4E0"},
+      {"category": "Blush",       "brand": "Dior",      "shade": "Rose Montaigne", "hex": "#E8A0A0"},
+      {"category": "Eyeliner",    "brand": "Urban Decay","shade": "Black",          "hex": "#1A1A1A"}
+    ]
+  },
+
+  "light_summer": {
+    "best_colors": [
+      {"name": "Sky Blue",        "hex": "#87CEEB"},
+      {"name": "Powder Pink",     "hex": "#FFB6C1"},
+      {"name": "Soft Lavender",   "hex": "#DCD0FF"},
+      {"name": "Mint",            "hex": "#98E5C1"},
+      {"name": "Cool Vanilla",    "hex": "#F3EAE3"}
+    ],
+    "neutral_colors": [
+      {"name": "Light Grey",      "hex": "#D3D3D3"},
+      {"name": "Rose Beige",      "hex": "#D4B4B4"},
+      {"name": "Soft Navy",       "hex": "#4A5A87"},
+      {"name": "Dusty Blue",      "hex": "#7EADCA"},
+      {"name": "Blush",           "hex": "#F4C2C2"}
+    ],
+    "avoid_colors": [
+      {"name": "Black",           "hex": "#0A0A0A"},
+      {"name": "Orange",          "hex": "#FF7518"},
+      {"name": "Burnt Sienna",    "hex": "#8A360F"},
+      {"name": "Dark Olive",      "hex": "#556B2F"},
+      {"name": "Mustard",         "hex": "#E1AD21"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "Charlotte Tilbury", "shade": "Pillow Talk",    "hex": "#C4848B"},
+      {"category": "Foundation",  "brand": "Maybelline",        "shade": "105 Cool Ivory", "hex": "#E8D5C4"},
+      {"category": "Eyeshadow",   "brand": "Charlotte Tilbury", "shade": "The Glazen Eye", "hex": "#DDBBCC"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Exhibit A",      "hex": "#E0AAAA"},
+      {"category": "Eyeliner",    "brand": "Marc Jacobs",       "shade": "Storm",          "hex": "#4A5568"}
+    ]
+  },
+
+  "cool_summer": {
+    "best_colors": [
+      {"name": "Soft Rose",       "hex": "#DEBCC0"},
+      {"name": "Dusty Blue",      "hex": "#6E90B0"},
+      {"name": "Cool Mauve",      "hex": "#9B7DA4"},
+      {"name": "Ashy Lavender",   "hex": "#B8AECC"},
+      {"name": "Cool Berry",      "hex": "#8B3A62"}
+    ],
+    "neutral_colors": [
+      {"name": "Medium Grey",     "hex": "#9EA4AA"},
+      {"name": "Cool Beige",      "hex": "#C8BAB4"},
+      {"name": "Greyed Navy",     "hex": "#3D5A7A"},
+      {"name": "Muted Teal",      "hex": "#5F8A8B"},
+      {"name": "Cocoa Rose",      "hex": "#C0888E"}
+    ],
+    "avoid_colors": [
+      {"name": "Warm Gold",       "hex": "#CFB53B"},
+      {"name": "Tomato Red",      "hex": "#CE2939"},
+      {"name": "Peach",           "hex": "#FFCBA4"},
+      {"name": "Rust Brown",      "hex": "#8B4513"},
+      {"name": "Warm Lime",       "hex": "#A6C739"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "Bobbi Brown",       "shade": "Pale Mauve",     "hex": "#AD7D8C"},
+      {"category": "Foundation",  "brand": "Armani",            "shade": "Luminous Silk 3.5","hex": "#D8BC9C"},
+      {"category": "Eyeshadow",   "brand": "Charlotte Tilbury", "shade": "Pillow Talk",    "hex": "#DEBCC0"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Dolce Vita",     "hex": "#C49090"},
+      {"category": "Eyeliner",    "brand": "Bobbi Brown",       "shade": "Smoke",          "hex": "#4A4A4A"}
+    ]
+  },
+
+  "soft_summer": {
+    "best_colors": [
+      {"name": "Dusty Rose",      "hex": "#DCAE96"},
+      {"name": "Muted Teal",      "hex": "#5F8A8B"},
+      {"name": "Greyish Mauve",   "hex": "#AF8F8C"},
+      {"name": "Soft Sage",       "hex": "#BCB88A"},
+      {"name": "Dusty Lavender",  "hex": "#B0A4C0"}
+    ],
+    "neutral_colors": [
+      {"name": "Taupe",           "hex": "#8B7D77"},
+      {"name": "Greyed Blue",     "hex": "#7B8FA1"},
+      {"name": "Warm Rose Grey",  "hex": "#BBA8A8"},
+      {"name": "Medium Ash",      "hex": "#958E8A"},
+      {"name": "Muted Plum",      "hex": "#8C6A7A"}
+    ],
+    "avoid_colors": [
+      {"name": "Bright White",    "hex": "#FFFFFF"},
+      {"name": "True Black",      "hex": "#0A0A0A"},
+      {"name": "Orange Red",      "hex": "#FF4500"},
+      {"name": "Neon Yellow",     "hex": "#FFFF00"},
+      {"name": "Royal Blue",      "hex": "#002366"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",               "shade": "Brave",          "hex": "#B5908A"},
+      {"category": "Foundation",  "brand": "Fenty Beauty",      "shade": "250N",           "hex": "#D4B89A"},
+      {"category": "Eyeshadow",   "brand": "Urban Decay",       "shade": "Naked 3",        "hex": "#CCADA4"},
+      {"category": "Blush",       "brand": "Tarte",             "shade": "Paaarty",        "hex": "#D4A0A0"},
+      {"category": "Eyeliner",    "brand": "L'Oreal",           "shade": "Infallible Brown","hex": "#6B4F3A"}
+    ]
+  },
+
+  "deep_autumn": {
+    "best_colors": [
+      {"name": "Chocolate Brown", "hex": "#7B3F00"},
+      {"name": "Forest Green",    "hex": "#228B22"},
+      {"name": "Burgundy",        "hex": "#800020"},
+      {"name": "Gold",            "hex": "#CFB53B"},
+      {"name": "Rust",            "hex": "#B7410E"}
+    ],
+    "neutral_colors": [
+      {"name": "Dark Olive",      "hex": "#556B2F"},
+      {"name": "Warm Taupe",      "hex": "#8B7D6B"},
+      {"name": "Mahogany",        "hex": "#C04000"},
+      {"name": "Aubergine",       "hex": "#614051"},
+      {"name": "Espresso",        "hex": "#4F2D1A"}
+    ],
+    "avoid_colors": [
+      {"name": "Icy Pink",        "hex": "#FFB7D5"},
+      {"name": "Baby Blue",       "hex": "#89CFF0"},
+      {"name": "Lavender",        "hex": "#967BB6"},
+      {"name": "Pure White",      "hex": "#FDFDFD"},
+      {"name": "Silver Grey",     "hex": "#C0C0C0"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",        "shade": "Diva",          "hex": "#7B2D3E"},
+      {"category": "Foundation",  "brand": "Armani",     "shade": "Luminous Silk 6","hex": "#C09175"},
+      {"category": "Eyeshadow",   "brand": "Urban Decay", "shade": "Half Baked",   "hex": "#C8861A"},
+      {"category": "Blush",       "brand": "NARS",        "shade": "Sin",          "hex": "#8B3A52"},
+      {"category": "Eyeliner",    "brand": "Stila",       "shade": "Bronze",       "hex": "#8A6520"}
+    ]
+  },
+
+  "warm_autumn": {
+    "best_colors": [
+      {"name": "Terracotta",      "hex": "#C87941"},
+      {"name": "Warm Olive",      "hex": "#8A9A5B"},
+      {"name": "Spice Orange",    "hex": "#C84B31"},
+      {"name": "Camel",           "hex": "#C19A6B"},
+      {"name": "Dark Gold",       "hex": "#B8860B"}
+    ],
+    "neutral_colors": [
+      {"name": "Warm Brown",      "hex": "#7B5B3A"},
+      {"name": "Pumpkin",         "hex": "#CF6F3E"},
+      {"name": "Sage Green",      "hex": "#8F9779"},
+      {"name": "Warm Beige",      "hex": "#D4B896"},
+      {"name": "Copper",          "hex": "#B87333"}
+    ],
+    "avoid_colors": [
+      {"name": "Ice Blue",        "hex": "#99C5C4"},
+      {"name": "Fuchsia",         "hex": "#C154C1"},
+      {"name": "Lavender",        "hex": "#967BB6"},
+      {"name": "Silver",          "hex": "#C0C0C0"},
+      {"name": "Cool Pink",       "hex": "#FFB6C1"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "Charlotte Tilbury", "shade": "Walk of Shame",  "hex": "#C26060"},
+      {"category": "Foundation",  "brand": "Bobbi Brown",       "shade": "Natural 4",      "hex": "#CBAB8C"},
+      {"category": "Eyeshadow",   "brand": "Too Faced",         "shade": "Chocolate Bar",  "hex": "#7B4A2D"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Casino",         "hex": "#C47048"},
+      {"category": "Eyeliner",    "brand": "Urban Decay",       "shade": "Zero",           "hex": "#1A1A1A"}
+    ]
+  },
+
+  "soft_autumn": {
+    "best_colors": [
+      {"name": "Warm Taupe",      "hex": "#937166"},
+      {"name": "Muted Sage",      "hex": "#89A07A"},
+      {"name": "Dusty Peach",     "hex": "#D9A98F"},
+      {"name": "Caramel",         "hex": "#C68642"},
+      {"name": "Soft Teal",       "hex": "#7AA4A4"}
+    ],
+    "neutral_colors": [
+      {"name": "Warm Sand",       "hex": "#C2A882"},
+      {"name": "Mocha",           "hex": "#8B6B61"},
+      {"name": "Dusty Coral",     "hex": "#CC8E7A"},
+      {"name": "Faded Olive",     "hex": "#959A6B"},
+      {"name": "Clay",            "hex": "#B7674A"}
+    ],
+    "avoid_colors": [
+      {"name": "Electric Blue",   "hex": "#007FFF"},
+      {"name": "Bright White",    "hex": "#FDFDFD"},
+      {"name": "True Black",      "hex": "#0A0A0A"},
+      {"name": "Fuchsia",         "hex": "#C154C1"},
+      {"name": "Ice Pink",        "hex": "#FFD1DC"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",               "shade": "Cherish",        "hex": "#B05A5A"},
+      {"category": "Foundation",  "brand": "Bobbi Brown",       "shade": "Warm Natural 3.5","hex": "#C8A880"},
+      {"category": "Eyeshadow",   "brand": "Charlotte Tilbury", "shade": "Smokey Eye 2",   "hex": "#8B6B61"},
+      {"category": "Blush",       "brand": "Tarte",             "shade": "Blushing Bride", "hex": "#D4906E"},
+      {"category": "Eyeliner",    "brand": "L'Oreal",           "shade": "Brown Noir",     "hex": "#5C3317"}
+    ]
+  },
+
+  "light_spring": {
+    "best_colors": [
+      {"name": "Warm Peach",      "hex": "#FFDAB9"},
+      {"name": "Sunshine Yellow", "hex": "#FFDB58"},
+      {"name": "Coral Pink",      "hex": "#F88379"},
+      {"name": "Light Aqua",      "hex": "#A0E8E0"},
+      {"name": "Warm Ivory",      "hex": "#FFFFF0"}
+    ],
+    "neutral_colors": [
+      {"name": "Warm Blonde",     "hex": "#DAA520"},
+      {"name": "Soft Camel",      "hex": "#D4AA70"},
+      {"name": "Light Peach",     "hex": "#FFD5AB"},
+      {"name": "Spring Green",    "hex": "#98D8C8"},
+      {"name": "Warm White",      "hex": "#FAF0E6"}
+    ],
+    "avoid_colors": [
+      {"name": "True Black",      "hex": "#0A0A0A"},
+      {"name": "Cool Charcoal",   "hex": "#36454F"},
+      {"name": "Dark Burgundy",   "hex": "#800020"},
+      {"name": "Cool Lavender",   "hex": "#967BB6"},
+      {"name": "Slate Grey",      "hex": "#708090"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "Charlotte Tilbury", "shade": "Kissing Rose",   "hex": "#DEAAB5"},
+      {"category": "Foundation",  "brand": "Maybelline",        "shade": "120 Classic Ivory","hex": "#F0DBBE"},
+      {"category": "Eyeshadow",   "brand": "Too Faced",         "shade": "Sweet Peach",    "hex": "#F4C4A0"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Luster",         "hex": "#E8B8B0"},
+      {"category": "Eyeliner",    "brand": "Bobbi Brown",       "shade": "Honey",          "hex": "#B8860B"}
+    ]
+  },
+
+  "warm_spring": {
+    "best_colors": [
+      {"name": "Warm Coral",      "hex": "#FF6B6B"},
+      {"name": "Golden Yellow",   "hex": "#FFD700"},
+      {"name": "Warm Turquoise",  "hex": "#40E0D0"},
+      {"name": "Tomato Red",      "hex": "#CE2939"},
+      {"name": "Grass Green",     "hex": "#7CBA40"}
+    ],
+    "neutral_colors": [
+      {"name": "Golden Beige",    "hex": "#D4A857"},
+      {"name": "Warm Tan",        "hex": "#C4A882"},
+      {"name": "Butterscotch",    "hex": "#C79B3A"},
+      {"name": "Warm Khaki",      "hex": "#C3B091"},
+      {"name": "Bright Camel",    "hex": "#D4AA70"}
+    ],
+    "avoid_colors": [
+      {"name": "Ash Grey",        "hex": "#B2BEB5"},
+      {"name": "Cool Mauve",      "hex": "#9B7DA4"},
+      {"name": "Dusty Blue",      "hex": "#6E90B0"},
+      {"name": "Cool Berry",      "hex": "#8B3A62"},
+      {"name": "Charcoal",        "hex": "#36454F"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "MAC",               "shade": "Coral Bliss",    "hex": "#F26A4F"},
+      {"category": "Foundation",  "brand": "Fenty Beauty",      "shade": "230W",           "hex": "#D4A878"},
+      {"category": "Eyeshadow",   "brand": "Urban Decay",       "shade": "Naked Heat",     "hex": "#C8684A"},
+      {"category": "Blush",       "brand": "NARS",              "shade": "Exhibit A",      "hex": "#E07050"},
+      {"category": "Eyeliner",    "brand": "L'Oreal",           "shade": "Gold Bronze",    "hex": "#A07830"}
+    ]
+  },
+
+  "clear_spring": {
+    "best_colors": [
+      {"name": "Bright Coral",    "hex": "#FF6047"},
+      {"name": "Clear Aqua",      "hex": "#00B2CA"},
+      {"name": "Warm Yellow",     "hex": "#FFB400"},
+      {"name": "Clear Green",     "hex": "#00C48C"},
+      {"name": "Warm White",      "hex": "#FAF0E6"}
+    ],
+    "neutral_colors": [
+      {"name": "Golden Tan",      "hex": "#C8A060"},
+      {"name": "Bright Warm Beige","hex": "#E8C8A0"},
+      {"name": "Camel",           "hex": "#C19A6B"},
+      {"name": "Warm Ivory",      "hex": "#FFFFF0"},
+      {"name": "Warm Dove Grey",  "hex": "#C8C0A8"}
+    ],
+    "avoid_colors": [
+      {"name": "Dusty Rose",      "hex": "#DCAE96"},
+      {"name": "Muted Teal",      "hex": "#5F8A8B"},
+      {"name": "Cool Grey",       "hex": "#9EA4AA"},
+      {"name": "Dark Plum",       "hex": "#4E1F5A"},
+      {"name": "Cool Navy",       "hex": "#000080"}
+    ],
+    "cosmetics": [
+      {"category": "Lipstick",    "brand": "NYX",               "shade": "Butter Gloss Creme Brulee","hex": "#E8A080"},
+      {"category": "Foundation",  "brand": "Armani",            "shade": "Luminous Silk 4.5","hex": "#D0AF88"},
+      {"category": "Eyeshadow",   "brand": "Pat McGrath",       "shade": "Bronze Seduction","hex": "#C07030"},
+      {"category": "Blush",       "brand": "Charlotte Tilbury", "shade": "Lucky Charm",    "hex": "#E89060"},
+      {"category": "Eyeliner",    "brand": "Stila",             "shade": "Topaz",          "hex": "#B08040"}
+    ]
+  }
+}

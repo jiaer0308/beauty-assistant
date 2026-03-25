@@ -12,10 +12,10 @@ The aligned face is then used for BiSeNet segmentation and color extraction.
 import cv2
 import numpy as np
 import mediapipe as mp
-from typing import Dict, Tuple, Optional
 import logging
 import math
-
+from typing import Dict, Tuple, Optional, List
+from app.ml_engine.loader import ModelLoader
 
 logger = logging.getLogger(__name__)
 
@@ -40,21 +40,11 @@ class FaceAligner:
     
     def __init__(self):
         """
-        Initialize MediaPipe Face Mesh
-        
-        Configuration:
-        - static_image_mode=True: Optimized for single images (not video)
-        - max_num_faces=1: We only process one face
-        - refine_landmarks=True: Enables iris landmarks (468-478)
-        - min_detection_confidence=0.5: Balanced sensitivity
+        Initialize FaceAligner using the shared ModelLoader singleton.
         """
-        self.face_mesh = mp.solutions.face_mesh.FaceMesh(
-            static_image_mode=True,
-            max_num_faces=1,
-            refine_landmarks=True,  # Required for iris detection
-            min_detection_confidence=0.5
-        )
-        logger.info("FaceAligner initialized with MediaPipe Face Mesh")
+        # Use the singleton instance from ModelLoader
+        self.face_mesh = ModelLoader().face_mesh
+        logger.info("FaceAligner initialized (using shared MediaPipe instance)")
     
     def detect_and_align(
         self,

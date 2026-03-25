@@ -62,6 +62,13 @@ class SeasonResult:
     
     face_bbox: tuple = (0, 0, 0, 0)
     """Face bounding box in original image (x, y, w, h)"""
+
+    # ========== Recommendations (populated after fusion) ==========
+    recommendations: Dict[str, Any] = field(default_factory=dict)
+    """Colour palette and cosmetic recommendations from knowledge base"""
+
+    quiz_influence: float = 0.0
+    """0–1 float indicating how much quiz data shifted the final result"""
     
     def __post_init__(self):
         """Validate entity after initialization"""
@@ -139,7 +146,9 @@ class SeasonResult:
             "debug_info": {
                 "lighting_quality": self.lighting_quality,
                 "processing_time_ms": self.processing_time_ms
-            }
+            },
+            "recommendations": self.recommendations,
+            "quiz_influence": round(self.quiz_influence, 4),
         }
     
     def __str__(self) -> str:

@@ -21,8 +21,9 @@ import numpy as np
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
-from typing import Dict, Tuple
-import logging
+from typing import Dict, Optional, Tuple, List
+import logging  
+from sqlalchemy.orm import Session
 
 # Internal imports
 from app.ml_engine.loader import ModelLoader
@@ -37,7 +38,12 @@ from app.ml_engine.seasonal.color import (
 from app.ml_engine.seasonal.classifier import SeasonalColorClassifier
 
 from app.domain.entities.season_result import SeasonResult
+from app.domain.entities.user import User
 from app.domain.value_objects.color_lab import ColorLAB
+from app.schemas.sca import QuizData
+from app.services.quiz_engine import QuizEngine
+from app.services.recommendation_mapper import get_recommendation_mapper
+from app.services.history_service import HistoryService
 
 
 logger = logging.getLogger(__name__)
@@ -118,38 +124,44 @@ class SCAWorkflowService:
         self.aligner = FaceAligner()
         self.parser = BiSeNetParser(self.models.bisenet_session)
         self.classifier = SeasonalColorClassifier()
+        self.quiz_engine = QuizEngine()
+        self.recommendation_mapper = get_recommendation_mapper()
 
         
         logger.info("SCAWorkflowService initialized successfully")
     
-    async def analyze(self, image_bytes: bytes) -> SeasonResult:
+    async def analyze(
+        self,
+        image_bytes: bytes,
+        db: Session,
+        user_id: int,
+        quiz_data: Optional[QuizData] = None,
+    ) -> SeasonResult:
         """
-        Execute complete SCA pipeline on uploaded image
-        
+        Execute complete SCA pipeline on uploaded image.
+
         Pipeline:
         Phase 0: Validation
         Phase 1: Hybrid Vision (Alignment + Segmentation + Refinement)
         Phase 2: Color Engine (Extraction + LAB conversion)
         Phase 3: Classification (Decision tree)
-        
+        Phase 4: Quiz Fusion + Recommendation Mapping  [NEW]
+
         Args:
             image_bytes: Raw image bytes (JPEG/PNG)
-        
+            db:          Database session
+            user_id:     ID of the user performing analysis
+            quiz_data:   Optional user quiz answers for score fusion
+
         Returns:
-            SeasonResult entity with season, confidence, colors, metrics
-        
+            SeasonResult entity with season, confidence, colors, metrics,
+            recommendations, and quiz_influence
+
         Raises:
             ValidationError: If lighting is too poor or no face detected
-            
-        Example:
-            >>> service = SCAWorkflowService()
-            >>> with open("photo.jpg", "rb") as f:
-            ...     image_bytes = f.read()
-            >>> result = await service.analyze(image_bytes)
-            >>> print(f"Season: {result.season}, Confidence: {result.confidence}")
         """
         start_time = time.time()
-        logger.info("Starting SCA analysis pipeline...")
+        logger.info("Starting SCA analysis pipeline for user %d...", user_id)
         
         # ========== Load Image ==========
         image = self._bytes_to_array(image_bytes)
@@ -256,10 +268,59 @@ class SCAWorkflowService:
         
         season = classification_result.season
         confidence = classification_result.confidence
-        
 
         logger.info(
-            f"  ✓ Classification: {season.value} "
+            f"  ✓ Image classification: {season.value} "
+            f"(confidence={confidence:.2f})"
+        )
+
+        # ========== Phase 4: Quiz Fusion + Recommendation Mapping ==========
+        logger.info("Phase 4: Quiz fusion and recommendation mapping")
+
+        # Build image score map from classifier's raw scores
+        image_scores: Dict[str, float] = getattr(
+            classification_result, "all_scores", {season.value: confidence}
+        )
+
+        # Weighted fusion (30% quiz / 70% image)
+        if quiz_data is not None:
+            fused_scores = self.quiz_engine.compute_quiz_adjustments(
+                quiz_data, image_scores
+            )
+            # Re-pick the top season after fusion
+            top_season_key = max(fused_scores, key=fused_scores.get)  # type: ignore[arg-type]
+            if top_season_key != season.value:
+                logger.info(
+                    "  Quiz fusion changed result: %s → %s",
+                    season.value, top_season_key,
+                )
+                from app.domain.value_objects.seasonal_season import SeasonalSeason
+                season = SeasonalSeason(top_season_key)
+                confidence = float(fused_scores[top_season_key])
+
+            quiz_influence = self.quiz_engine.compute_quiz_influence(
+                quiz_data, image_scores, fused_scores
+            )
+        else:
+            quiz_influence = 0.0
+            logger.info("  No quiz data provided — using image scores only")
+
+        # Load colour + cosmetic recommendations
+        try:
+            recs = self.recommendation_mapper.get_recommendations(
+                season.value, db, quiz_data.dict() if quiz_data else None
+            )
+        except ValueError:
+            logger.warning("No recommendations for %s — returning empty dict", season.value)
+            recs = {}
+
+        logger.info(
+            "  ✓ Phase 4 complete: season=%s, quiz_influence=%.2f",
+            season.value, quiz_influence,
+        )
+
+        logger.info(
+            f"  ✓ Final result: {season.value} "
             f"(confidence={confidence:.2f})"
         )
         
@@ -279,13 +340,53 @@ class SCAWorkflowService:
             timestamp=datetime.now(),
             # Additional metadata
             rotation_angle=rotation_angle,
-            face_bbox=alignment_result["bbox"]
+            face_bbox=alignment_result["bbox"],
+            # Recommendations and quiz influence [NEW]
+            recommendations=recs,
+            quiz_influence=quiz_influence,
         )
         
         logger.info(
             f"✓ SCA analysis complete in {processing_time_ms}ms: "
             f"{result.season.value} ({result.confidence:.0%})"
         )
+
+        # ========== Task 7: Save History & Update User ==========
+        # Mapping for Season enum to Database ID (1-12)
+        season_id_map = {
+            "clear_spring": 1,
+            "warm_spring": 2,
+            "light_spring": 3,
+            "light_summer": 4,
+            "cool_summer": 5,
+            "soft_summer": 6,
+            "soft_autumn": 7,
+            "warm_autumn": 8,
+            "deep_autumn": 9,
+            "deep_winter": 10,
+            "cool_winter": 11,
+            "clear_winter": 12,
+        }
+        season_id = season_id_map.get(result.season.value)
+
+        # Extract cosmetic_ids from the analysis result (if they exist)
+        cosmetic_ids = [
+            c.get("id") for c in result.recommendations.get("cosmetics", []) 
+            if c.get("id") is not None
+        ]
+
+        # Save the analysis session to history
+        HistoryService.save_session(
+            db, user_id, "sca_scan", season_id, cosmetic_ids, None
+        )
+
+        # Update the User's current season in the database
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if db_user:
+            db_user.current_season_id = season_id
+            db.add(db_user)
+            db.commit()
+            logger.info("Updated user %d current_season_id to %d", user_id, season_id)
         
         return result
     

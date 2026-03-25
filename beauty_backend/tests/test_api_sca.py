@@ -60,6 +60,38 @@ def _mock_season_result() -> MagicMock:
     result.lighting_quality = "good"
     result.rotation_angle = 2.3
     result.timestamp = datetime(2026, 3, 3, 1, 0, 0)
+    # ── NEW fields ──────────────────────────────────────────────────────────
+    result.quiz_influence = 0.18
+    result.recommendations = {
+        "best_colors": [
+            {"name": "Warm Taupe",   "hex": "#937166"},
+            {"name": "Muted Sage",   "hex": "#89A07A"},
+            {"name": "Dusty Peach",  "hex": "#D9A98F"},
+            {"name": "Caramel",      "hex": "#C68642"},
+            {"name": "Soft Teal",    "hex": "#7AA4A4"},
+        ],
+        "neutral_colors": [
+            {"name": "Warm Sand",    "hex": "#C2A882"},
+            {"name": "Mocha",        "hex": "#8B6B61"},
+            {"name": "Dusty Coral",  "hex": "#CC8E7A"},
+            {"name": "Faded Olive",  "hex": "#959A6B"},
+            {"name": "Clay",         "hex": "#B7674A"},
+        ],
+        "avoid_colors": [
+            {"name": "Electric Blue", "hex": "#007FFF"},
+            {"name": "Bright White",  "hex": "#FDFDFD"},
+            {"name": "True Black",    "hex": "#0A0A0A"},
+            {"name": "Fuchsia",       "hex": "#C154C1"},
+            {"name": "Ice Pink",      "hex": "#FFD1DC"},
+        ],
+        "cosmetics": [
+            {"category": "Lipstick",   "brand": "MAC",               "shade": "Cherish",          "hex": "#B05A5A"},
+            {"category": "Foundation", "brand": "Bobbi Brown",       "shade": "Warm Natural 3.5", "hex": "#C8A880"},
+            {"category": "Eyeshadow",  "brand": "Charlotte Tilbury", "shade": "Smokey Eye 2",     "hex": "#8B6B61"},
+            {"category": "Blush",      "brand": "Tarte",             "shade": "Blushing Bride",   "hex": "#D4906E"},
+            {"category": "Eyeliner",   "brand": "L'Oreal",           "shade": "Brown Noir",       "hex": "#5C3317"},
+        ],
+    }
     return result
 
 
@@ -150,6 +182,36 @@ class TestAnalyzeEndpointSuccess:
             files={"file": ("selfie.jpg", _make_jpeg_bytes(), "image/jpeg")},
         ).json()
         assert body["debug_info"]["processing_time_ms"] == 850
+
+    def test_response_includes_recommendations(self, client):
+        """Response must contain color_palette and cosmetics inside recommendations."""
+        body = client.post(
+            "/api/v1/sca/analyze",
+            files={"file": ("selfie.jpg", _make_jpeg_bytes(), "image/jpeg")},
+        ).json()
+        assert "recommendations" in body, "Missing 'recommendations' key in response"
+        recs = body["recommendations"]
+        assert "color_palette" in recs, "Missing 'color_palette' inside recommendations"
+        palette = recs["color_palette"]
+        assert "best"    in palette, "Missing 'best' colour list"
+        assert "neutral" in palette, "Missing 'neutral' colour list"
+        assert "avoid"   in palette, "Missing 'avoid' colour list"
+        assert len(palette["best"])    == 5
+        assert len(palette["neutral"]) == 5
+        assert len(palette["avoid"])   == 5
+        assert "cosmetics" in recs, "Missing 'cosmetics' inside recommendations"
+        assert len(recs["cosmetics"]) == 5
+
+    def test_quiz_influence_in_response(self, client):
+        """Response must contain quiz_influence as a float between 0 and 1."""
+        body = client.post(
+            "/api/v1/sca/analyze",
+            files={"file": ("selfie.jpg", _make_jpeg_bytes(), "image/jpeg")},
+        ).json()
+        assert "quiz_influence" in body, "Missing 'quiz_influence' in response"
+        val = body["quiz_influence"]
+        assert isinstance(val, float), f"quiz_influence should be float, got {type(val)}"
+        assert 0.0 <= val <= 1.0, f"quiz_influence {val} out of [0, 1]"
 
 
 # ---------------------------------------------------------------------------

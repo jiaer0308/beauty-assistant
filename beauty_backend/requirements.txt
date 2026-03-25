@@ -23,6 +23,11 @@ scikit-learn==1.3.2
 Pillow==11.0.0
 scikit-image==0.24.0  # For validated RGB→LAB conversion
 
+# Database
+sqlalchemy>=2.0.0
+mysql-connector-python>=9.0.0   # For mysql+mysqlconnector:// URLs
+pymysql>=1.0.0                  # Alternative MySQL driver (mysql+pymysql:// URLs)
+
 # Utilities
 python-dotenv==1.0.1
 
