@@ -104,10 +104,11 @@ class PhotoPreviewScreen extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            // TODO: Send data to backend (Page 12)
-                            // For now, print to console to verify
-                            debugPrint('Quiz Data: $quizData');
-                            debugPrint('Image Path: $imagePath');
+                            // Navigate to Magic Waiting / Result Screen
+                            context.push('/result', extra: {
+                              'imagePath': imagePath,
+                              'quizData': quizData,
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: GlowTheme.champagneGold,

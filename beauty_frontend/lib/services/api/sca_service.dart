@@ -1,6 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../core/network/dio_provider.dart';
+
+import '../../features/camera/data/models/color_analysis_response.dart';
+
+final scaServiceProvider = Provider<ScaService>((ref) {
+  final dio = ref.read(dioProvider);
+  return ScaService(dio: dio);
+});
 
 class QuizData {
   final String skinType;
@@ -19,30 +29,12 @@ class QuizData {
 
   Map<String, dynamic> toJson() {
     return {
-      'skinType': skinType,
-      'sunReaction': sunReaction,
-      'veinColor': veinColor,
-      'naturalHairColor': naturalHairColor,
-      'jewelryPreference': jewelryPreference,
+      'skin_type': skinType,
+      'sun_reaction': sunReaction,
+      'vein_color': veinColor,
+      'natural_hair_color': naturalHairColor,
+      'jewelry_preference': jewelryPreference,
     };
-  }
-}
-
-class SCAResponse {
-  final String season;
-  final Map<String, dynamic> analysisDetails;
-  
-  // Can add more fields based on the actual JSON response
-  const SCAResponse({
-    required this.season,
-    required this.analysisDetails,
-  });
-
-  factory SCAResponse.fromJson(Map<String, dynamic> json) {
-    return SCAResponse(
-      season: json['season'] as String? ?? 'Unknown',
-      analysisDetails: json['details'] as Map<String, dynamic>? ?? {},
-    );
   }
 }
 
@@ -50,16 +42,11 @@ class ScaService {
   final Dio _dio;
 
   // Initialize with optional Dio instance for testing, otherwise configure default
-  ScaService({Dio? dio}) : _dio = dio ?? Dio() {
-    // Basic setup, you can inject interceptors or change the BaseUrl
-    _dio.options.baseUrl = 'http://10.0.2.2:8000'; // Target Android emulator localhost
-    _dio.options.connectTimeout = const Duration(seconds: 30);
-    _dio.options.receiveTimeout = const Duration(seconds: 60);
-    _dio.options.sendTimeout = const Duration(seconds: 60);
-  }
+  ScaService({Dio? dio}) : _dio = dio ?? Dio();
 
   /// Send image and quiz data to SCA analyze endpoint
-  Future<SCAResponse> analyzeColor(File imageFile, QuizData quizData) async {
+  Future<ColorAnalysisResponse> analyzeImage(String imagePath, QuizData? quizData) async {
+    final imageFile = File(imagePath);
     try {
       // Create Dio FormData
       final formData = FormData.fromMap({
@@ -68,7 +55,7 @@ class ScaService {
           // Explicitly defining filename is a good practice for Android robustness
           filename: imageFile.path.split(Platform.pathSeparator).last,
         ),
-        'quiz_data': jsonEncode(quizData.toJson()),
+        'quiz_data': quizData != null ? jsonEncode(quizData.toJson()) : null,
       });
 
       // Execute POST request
@@ -79,7 +66,7 @@ class ScaService {
 
       // Handle successful status codes
       if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
-        return SCAResponse.fromJson(response.data as Map<String, dynamic>);
+        return ColorAnalysisResponse.fromJson(response.data as Map<String, dynamic>);
       } else {
         throw Exception('Failed to analyze color: ${response.statusCode}');
       }

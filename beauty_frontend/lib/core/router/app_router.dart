@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/onboarding/presentation/screens/onboarding_quiz_screen.dart';
 import '../../features/camera/presentation/screens/camera.dart';
 import '../../features/camera/presentation/screens/photo_preview_screen.dart';
+import '../../features/camera/presentation/screens/result_screen.dart';
+import '../../features/camera/presentation/screens/result_dashboard_screen.dart';
+import '../../features/camera/data/models/color_analysis_response.dart';
+import '../../features/history/presentation/screens/history_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -28,6 +31,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final quizData = extras['quizData'] as Map<String, dynamic>?;
           return PhotoPreviewScreen(imagePath: imagePath, quizData: quizData);
         },
+      ),
+      GoRoute(
+        path: '/result',
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>?;
+          return ResultScreen(data: data);
+        },
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) {
+          final analysisResponse = state.extra as ColorAnalysisResponse?;
+          return ResultDashboardScreen(analysisData: analysisResponse);
+        },
+      ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => const HistoryScreen(),
       ),
     ],
   );
