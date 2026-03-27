@@ -7,11 +7,18 @@ import '../../features/camera/presentation/screens/result_screen.dart';
 import '../../features/camera/presentation/screens/result_dashboard_screen.dart';
 import '../../features/camera/data/models/color_analysis_response.dart';
 import '../../features/history/presentation/screens/history_screen.dart';
+import '../../features/camera/presentation/screens/ar_tryon_screen.dart';
+import '../../features/auth/presentation/screens/splash_screen.dart';
+import '../../features/home/presentation/screens/atelier_home_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/',
     routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingQuizScreen(),
@@ -41,14 +48,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/dashboard',
-        builder: (context, state) {
-          final analysisResponse = state.extra as ColorAnalysisResponse?;
-          return ResultDashboardScreen(analysisData: analysisResponse);
-        },
+        builder: (context, state) => const AtelierHomeScreen(),
       ),
       GoRoute(
         path: '/history',
         builder: (context, state) => const HistoryScreen(),
+      ),
+      GoRoute(
+        path: '/ar-tryon',
+        builder: (context, state) => const ArTryonScreen(),
       ),
     ],
   );
