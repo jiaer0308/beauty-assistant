@@ -13,6 +13,7 @@ class TokenStorageService {
 
   static const String _tokenKey = 'auth_token';
   static const String _guestTokenKey = 'guest_token';
+  static const String _emailKey = 'user_email';
 
   /// Save JWT token
   Future<void> saveToken(String token) async {
@@ -27,6 +28,21 @@ class TokenStorageService {
   /// Delete JWT token
   Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
+  }
+
+  /// Save User Email
+  Future<void> saveEmail(String email) async {
+    await _storage.write(key: _emailKey, value: email);
+  }
+
+  /// Get User Email
+  Future<String?> getEmail() async {
+    return await _storage.read(key: _emailKey);
+  }
+
+  /// Delete User Email
+  Future<void> deleteEmail() async {
+    await _storage.delete(key: _emailKey);
   }
 
   /// Save Guest Token (UUID)
