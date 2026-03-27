@@ -21,9 +21,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final token = await _tokenStorage.getToken();
       final guestToken = await _tokenStorage.getGuestToken();
+      final email = await _tokenStorage.getEmail();
 
       if (token != null) {
-        state = state.copyWith(status: AuthStatus.authenticated, token: token);
+        state = state.copyWith(status: AuthStatus.authenticated, token: token, email: email);
       } else if (guestToken != null) {
         state = state.copyWith(status: AuthStatus.guest, guestToken: guestToken);
       } else {
@@ -58,8 +59,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         guestToken: guestToken,
       );
       
-      final token = data['access_token'];
+      final token = data['token']['access_token'];
       await _tokenStorage.saveToken(token);
+      await _tokenStorage.saveEmail(email);
       // Remove guest token after successful upgrade
       await _tokenStorage.deleteGuestToken();
       
@@ -74,8 +76,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(status: AuthStatus.loading);
     try {
       final data = await _authService.login(email: email, password: password);
-      final token = data['access_token'];
+      final token = data['token']['access_token'];
       await _tokenStorage.saveToken(token);
+      await _tokenStorage.saveEmail(email);
       
       // Also cleanup guest token if it exists
       await _tokenStorage.deleteGuestToken();
