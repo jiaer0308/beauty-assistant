@@ -8,18 +8,23 @@ enum AuthViewState { options, login, signup }
 
 class AuthBottomSheet extends ConsumerStatefulWidget {
   final String discoveredSeason;
+  final VoidCallback? onSuccess;
   
   const AuthBottomSheet({
     super.key, 
     this.discoveredSeason = 'Deep Autumn', // Fallback context
+    this.onSuccess,
   });
 
-  static void show(BuildContext context, {String discoveredSeason = 'Deep Autumn'}) {
+  static void show(BuildContext context, {String discoveredSeason = 'Deep Autumn', VoidCallback? onSuccess}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AuthBottomSheet(discoveredSeason: discoveredSeason),
+      builder: (context) => AuthBottomSheet(
+        discoveredSeason: discoveredSeason,
+        onSuccess: onSuccess,
+      ),
     );
   }
 
@@ -92,9 +97,16 @@ class _AuthBottomSheetState extends ConsumerState<AuthBottomSheet> {
     final authState = ref.read(authProvider);
     if (authState.status == AuthStatus.authenticated) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Welcome back!')),
-      );
+      if (widget.onSuccess != null) {
+        // Need a small delay to allow bottom sheet to pop before pushing new route
+        Future.delayed(const Duration(milliseconds: 100), () {
+          widget.onSuccess!();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Welcome back!')),
+        );
+      }
     } else if (authState.status == AuthStatus.error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authState.errorMessage ?? 'Authentication failed')),

@@ -85,12 +85,14 @@ class ColorInfo {
 class ProductRecommendation {
   final String brand;
   final String name;
+  final String shade;
   final int matchPercentage;
   final String imageUrl;
 
   ProductRecommendation({
     required this.brand,
     required this.name,
+    required this.shade,
     required this.matchPercentage,
     required this.imageUrl,
   });
@@ -100,6 +102,7 @@ class ProductRecommendation {
       brand: json['brand'] ?? '',
       name: json['name'] ?? '',
       shade: json['shade'] ?? '',
+      matchPercentage: json['matchPercentage'] ?? 0,
       imageUrl: json['image_url'] ?? '',
     );
   }

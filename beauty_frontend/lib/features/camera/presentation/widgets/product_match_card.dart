@@ -39,7 +39,7 @@ class ProductMatchCard extends StatelessWidget {
                   child: Center(
                     child: product.imageUrl.isNotEmpty && product.imageUrl != 'url'
                         ? Image.network(
-                            product.imageUrl,
+                            product.imageUrl.startsWith('//') ? 'https:${product.imageUrl}' : product.imageUrl,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
                                 const Icon(Icons.image_not_supported, color: GlowTheme.oatmeal),

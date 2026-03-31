@@ -42,11 +42,22 @@ class AuthService {
   }) async {
     final response = await _dio.post(
       '/api/v1/auth/login',
-      data: {
-        'username': email, // OAuth2 expects username
+      data: FormData.fromMap({
+        'username': email,
         'password': password,
-      },
-      options: Options(contentType: Headers.formUrlEncodedContentType),
+        'grant_type': 'password',
+      }),
+    );
+    return response.data;
+  }
+
+  /// Verify token and get current user profile
+  Future<Map<String, dynamic>> verifyToken(String token) async {
+    final response = await _dio.get(
+      '/api/v1/auth/me',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
     );
     return response.data;
   }

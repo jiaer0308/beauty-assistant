@@ -5,16 +5,19 @@ import '../../../auth/presentation/widgets/auth_bottom_sheet.dart';
 import '../../data/models/color_analysis_response.dart';
 import '../widgets/result_hero_section.dart';
 import '../widgets/color_swatch_item.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/product_match_card.dart';
 import '../widgets/sticky_ar_footer.dart';
+import 'package:beauty_assistant/features/auth/presentation/providers/auth_provider.dart';
+import 'package:beauty_assistant/features/auth/models/auth_state.dart';
 
-class ResultDashboardScreen extends StatelessWidget {
+class ResultDashboardScreen extends ConsumerWidget {
   final ColorAnalysisResponse? analysisData;
 
   const ResultDashboardScreen({super.key, this.analysisData});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // If data is null, provide a graceful fallback or empty set
     final data = analysisData ?? ColorAnalysisResponse(success: false);
     final isSuccess = data.success && data.result != null;
@@ -24,6 +27,7 @@ class ResultDashboardScreen extends StatelessWidget {
     final neutralColors = data.neutralColors;
     final avoidColors = data.avoidColors;
     final products = data.recommendedProducts;
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       backgroundColor: GlowTheme.pearlWhite,
@@ -183,7 +187,17 @@ class ResultDashboardScreen extends StatelessWidget {
       ),
       bottomNavigationBar: StickyArFooter(
         onPressed: () {
-          AuthBottomSheet.show(context, discoveredSeason: displayName);
+          if (authState.status == AuthStatus.authenticated) {
+            context.push('/ar-tryon');
+          } else {
+            AuthBottomSheet.show(
+              context, 
+              discoveredSeason: displayName,
+              onSuccess: () {
+                context.push('/ar-tryon');
+              },
+            );
+          }
         },
       ),
     );

@@ -10,15 +10,15 @@ final dioProvider = Provider<Dio>((ref) {
   // Allow setting API_URL via --dart-define, otherwise fallback to current IP
   const baseUrl = String.fromEnvironment(
     'API_URL', 
-    defaultValue: 'http://192.168.68.104:8000'
+    defaultValue: 'http://192.168.68.101:8000'
   );
   dio.options.baseUrl = baseUrl; 
-  dio.options.connectTimeout = const Duration(seconds: 30);
-  dio.options.receiveTimeout = const Duration(seconds: 60);
-  dio.options.sendTimeout = const Duration(seconds: 60);
+  dio.options.connectTimeout = const Duration(seconds: 10);
+  dio.options.receiveTimeout = const Duration(seconds: 30);
+  dio.options.sendTimeout = const Duration(seconds: 30);
 
   dio.interceptors.addAll([
-    AuthInterceptor(tokenStorage),
+    AuthInterceptor(tokenStorage, baseUrl: baseUrl),
     LogInterceptor(
       request: true,
       requestHeader: true,

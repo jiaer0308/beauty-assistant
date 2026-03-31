@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../../services/api/sca_service.dart';
+import '../../../../core/constants/season_constants.dart';
+import '../providers/color_analysis_provider.dart';
+import '../../../home/presentation/providers/dashboard_provider.dart';
 
 class ResultScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? data;
@@ -54,15 +57,19 @@ class _ResultScreenState extends ConsumerState<ResultScreen> with TickerProvider
     final String imagePath = widget.data!['imagePath'];
     final Map<String, dynamic>? rawQuizData = widget.data!['quizData'];
     
-    // Convert generic map to QuizData object
+    // Convert generic map to QuizData object safely
     QuizData? quizData;
-    if (rawQuizData != null) {
+    if (rawQuizData != null && rawQuizData.isNotEmpty) {
        quizData = QuizData(
-         skinType: rawQuizData['skin_type'],
-         sunReaction: rawQuizData['sun_reaction'],
-         veinColor: rawQuizData['wrist_vein'],
-         naturalHairColor: rawQuizData['hair_color'],
-         jewelryPreference: rawQuizData['jewelry'],
+         skinType: rawQuizData['skin_type']?.toString() ?? 'Unknown',
+         sunReaction: rawQuizData['sun_reaction']?.toString() ?? 'Unknown',
+         veinColor: rawQuizData['wrist_vein']?.toString() ?? 'Unknown',
+         naturalHairColor: rawQuizData['hair_color']?.toString() ?? 'Unknown',
+         jewelryPreference: rawQuizData['jewelry']?.toString() ?? 'Unknown',
+         foundationCoverage: rawQuizData['foundation_coverage']?.toString(),
+         makeupFinish: rawQuizData['makeup_finish']?.toString(),
+         skinConcerns: (rawQuizData['skin_concerns'] as List?)?.map((e) => e.toString()).toList(),
+         lipStyle: rawQuizData['lip_style']?.toString(),
        );
     }
 
@@ -76,7 +83,14 @@ class _ResultScreenState extends ConsumerState<ResultScreen> with TickerProvider
       }
 
       if (mounted) {
-        context.pushReplacement('/dashboard', extra: response);
+        // Update the global analysis provider so other screens (like AtelierHome) can use it
+        ref.read(currentAnalysisProvider.notifier).state = response;
+        
+        // Also refresh the dashboard so the home screen shows the new result
+        // after the user navigates back from the result dashboard.
+        ref.read(dashboardProvider.notifier).refresh();
+        
+        context.pushReplacement('/result-dashboard', extra: response);
       }
     } catch (e) {
       if (mounted) {
@@ -86,8 +100,10 @@ class _ResultScreenState extends ConsumerState<ResultScreen> with TickerProvider
   }
   
   void _showError(String message) {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
-     context.pop();
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
+       context.pop();
+     });
   }
 
   @override
@@ -296,20 +312,7 @@ class SegmentedProgressBar extends StatelessWidget {
 
 class ColorWheelPainter extends CustomPainter {
   // 12 Curated Colors representing the seasons, forming a harmonious wheel
-  final List<Color> seasonColors = [
-    const Color(0xFFFDEBB3), // Light Spring (pale butter yellow)
-    const Color(0xFFF4A261), // True Spring (warm coral)
-    const Color(0xFFE76F51), // Bright Spring (terracotta/bright rust)
-    const Color(0xFFE2C2C6), // Light Summer (soft cool pink)
-    const Color(0xFFA1ADC7), // True Summer (slate blue)
-    const Color(0xFF9CB3A1), // Soft Summer (sage green)
-    const Color(0xFFD4A373), // Soft Autumn (pale oat/fawn)
-    const Color(0xFFCB793A), // True Autumn (warm mustard/ochre)
-    const Color(0xFF8B5A2B), // Dark Autumn (deep warm brown)
-    const Color(0xFF55323E), // Dark Winter (deep cool burgundy)
-    const Color(0xFF1E3F5A), // True Winter (sapphire navy)
-    const Color(0xFF5B3C68), // Bright Winter (vibrant aubergine)
-  ];
+  final List<Color> seasonColors = SeasonTheme.allColors;
 
   @override
   void paint(Canvas canvas, Size size) {

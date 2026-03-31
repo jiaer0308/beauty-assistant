@@ -1,11 +1,13 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/onboarding/presentation/screens/onboarding_quiz_screen.dart';
+import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 import '../../features/camera/presentation/screens/camera.dart';
 import '../../features/camera/presentation/screens/photo_preview_screen.dart';
 import '../../features/camera/presentation/screens/result_screen.dart';
 import '../../features/camera/presentation/screens/result_dashboard_screen.dart';
 import '../../features/camera/data/models/color_analysis_response.dart';
+
 import '../../features/history/presentation/screens/history_screen.dart';
 import '../../features/camera/presentation/screens/ar_tryon_screen.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
@@ -18,6 +20,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/welcome',
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/onboarding',
@@ -47,6 +53,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
+        path: '/result-dashboard',
+        builder: (context, state) {
+          final analysisData = state.extra as ColorAnalysisResponse?;
+          return ResultDashboardScreen(analysisData: analysisData);
+        },
+      ),
+      GoRoute(
         path: '/dashboard',
         builder: (context, state) => const AtelierHomeScreen(),
       ),
@@ -56,7 +69,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/ar-tryon',
-        builder: (context, state) => const ArTryonScreen(),
+        builder: (context, state) {
+          final product = state.extra as ProductRecommendation?;
+          return ArTryonScreen(product: product);
+        },
       ),
     ],
   );

@@ -15,7 +15,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._authService, this._tokenStorage) : super(AuthState.initial());
 
-  /// Initialize auth state (check for existing tokens)
+  /// Initialize auth state (check for existing tokens and verify them)
   Future<void> init() async {
     state = state.copyWith(status: AuthStatus.loading);
     try {
@@ -24,8 +24,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final email = await _tokenStorage.getEmail();
 
       if (token != null) {
-        state = state.copyWith(status: AuthStatus.authenticated, token: token, email: email);
+        try {
+          // Verify token validity with backend
+          await _authService.verifyToken(token);
+          state = state.copyWith(status: AuthStatus.authenticated, token: token, email: email);
+        } catch (e) {
+          // Token is invalid (e.g., expired or user deleted)
+          print('Token verification failed: $e');
+          await _tokenStorage.deleteToken(); // Clean up invalid token
+          
+          if (guestToken != null) {
+            state = state.copyWith(status: AuthStatus.guest, guestToken: guestToken);
+          } else {
+            state = state.copyWith(status: AuthStatus.unauthenticated);
+          }
+        }
       } else if (guestToken != null) {
+        // Here we could also verify guestToken if there was a specific guest verify endpoint, 
+        // but typically guest tokens just get a 401 on standard routes if invalid.
         state = state.copyWith(status: AuthStatus.guest, guestToken: guestToken);
       } else {
         state = state.copyWith(status: AuthStatus.unauthenticated);

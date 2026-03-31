@@ -13,6 +13,9 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  bool _hasError = false;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -20,32 +23,82 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
+    setState(() {
+      _hasError = false;
+      _errorMessage = null;
+    });
+
+    print('SplashScreen: Initializing app...');
     final authNotifier = ref.read(authProvider.notifier);
-    await authNotifier.init();
+    
+    try {
+      print('SplashScreen: Calling authNotifier.init()...');
+      await authNotifier.init().timeout(const Duration(seconds: 15));
+      print('SplashScreen: authNotifier.init() completed.');
+    } catch (e) {
+      print('SplashScreen: Error during authNotifier.init(): $e');
+      // If it times out or fails, we might still want to try guest login or show error
+    }
     
     if (!mounted) return;
 
     final authState = ref.read(authProvider);
+    print('SplashScreen: Current AuthStatus: ${authState.status}');
     
     if (authState.status == AuthStatus.authenticated) {
       context.go('/dashboard');
     } else if (authState.status == AuthStatus.guest) {
-      context.go('/onboarding');
+      context.go('/welcome');
     } else {
-      await authNotifier.loginAsGuest();
-      if (mounted) context.go('/onboarding');
+      print('SplashScreen: Attempting loginAsGuest()...');
+      try {
+        await authNotifier.loginAsGuest().timeout(const Duration(seconds: 15));
+        print('SplashScreen: loginAsGuest() completed.');
+        
+        if (mounted) {
+          final newState = ref.read(authProvider);
+          if (newState.status == AuthStatus.error) {
+            setState(() {
+              _hasError = true;
+              _errorMessage = newState.errorMessage ?? 'Connection failed';
+            });
+            return;
+          }
+          context.go('/welcome');
+        }
+      } catch (e) {
+        print('SplashScreen: Error during loginAsGuest(): $e');
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+            _errorMessage = 'Could not connect to server. Please check your internet.';
+          });
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    // Listen for state changes and navigate automatically
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      print('SplashScreen: State change detected: ${next.status}');
+      if (next.status == AuthStatus.authenticated) {
+        print('SplashScreen: Navigating to /dashboard');
+        context.go('/dashboard');
+      } else if (next.status == AuthStatus.guest) {
+        print('SplashScreen: Navigating to /welcome');
+        context.go('/welcome');
+      }
+    });
+
+    return Scaffold(
       backgroundColor: GlowTheme.pearlWhite,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'GLOW',
               style: TextStyle(
                 fontSize: 32,
@@ -54,8 +107,33 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 color: GlowTheme.deepTaupe,
               ),
             ),
-            SizedBox(height: 24),
-            CircularProgressIndicator(color: GlowTheme.champagneGold),
+            const SizedBox(height: 48),
+            if (_hasError) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  _errorMessage ?? 'An error occurred',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.redAccent),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _initializeApp,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: GlowTheme.champagneGold,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Retry Connection'),
+              ),
+            ] else ...[
+              const CircularProgressIndicator(color: GlowTheme.champagneGold),
+              const SizedBox(height: 16),
+              const Text(
+                'Connecting...',
+                style: TextStyle(color: GlowTheme.deepTaupe, fontSize: 12),
+              ),
+            ],
           ],
         ),
       ),

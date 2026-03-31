@@ -31,7 +31,11 @@ class OnboardingQuizScreen extends ConsumerWidget {
                 curve: Curves.easeInOut,
               );
             } else {
-              context.pop();
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/dashboard');
+              }
             }
           },
         ),

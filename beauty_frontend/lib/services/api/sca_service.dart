@@ -18,6 +18,10 @@ class QuizData {
   final String veinColor;
   final String naturalHairColor;
   final String jewelryPreference;
+  final String? foundationCoverage;
+  final String? makeupFinish;
+  final List<String>? skinConcerns;
+  final String? lipStyle;
 
   const QuizData({
     required this.skinType,
@@ -25,6 +29,10 @@ class QuizData {
     required this.veinColor,
     required this.naturalHairColor,
     required this.jewelryPreference,
+    this.foundationCoverage,
+    this.makeupFinish,
+    this.skinConcerns,
+    this.lipStyle,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +42,10 @@ class QuizData {
       'vein_color': veinColor,
       'natural_hair_color': naturalHairColor,
       'jewelry_preference': jewelryPreference,
+      if (foundationCoverage != null) 'foundation_coverage': foundationCoverage,
+      if (makeupFinish != null) 'makeup_finish': makeupFinish,
+      if (skinConcerns != null) 'skin_concerns': skinConcerns,
+      if (lipStyle != null) 'lip_style': lipStyle,
     };
   }
 }
