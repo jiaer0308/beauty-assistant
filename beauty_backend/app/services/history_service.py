@@ -87,7 +87,8 @@ class HistoryService:
             List[RecommendationSessionOut]: List of session summaries
         """
         sessions = db.query(RecommendationSession).filter(
-            RecommendationSession.user_id == user_id
+            RecommendationSession.user_id == user_id,
+            RecommendationSession.is_archived == False
         ).order_by(RecommendationSession.created_at.desc()).all()
         
         return [RecommendationSessionOut.model_validate(s) for s in sessions]
@@ -108,7 +109,8 @@ class HistoryService:
             HTTPException: If session is not found
         """
         db_session = db.query(RecommendationSession).filter(
-            RecommendationSession.id == session_id
+            RecommendationSession.id == session_id,
+            RecommendationSession.is_archived == False
         ).first()
         
         if not db_session:
@@ -118,3 +120,33 @@ class HistoryService:
             )
             
         return RecommendationSessionDetailOut.model_validate(db_session)
+
+    @staticmethod
+    def archive_session(db: Session, session_id: int) -> bool:
+        """
+        Soft-deletes a specific recommendation session by marking it as archived.
+        
+        Args:
+            db (Session): Database session
+            session_id (int): The ID of the session to archive
+            
+        Returns:
+            bool: True if archived successfully
+            
+        Raises:
+            HTTPException: If session is not found
+        """
+        db_session = db.query(RecommendationSession).filter(
+            RecommendationSession.id == session_id,
+            RecommendationSession.is_archived == False
+        ).first()
+        
+        if not db_session:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Recommendation session {session_id} not found"
+            )
+            
+        db_session.is_archived = True
+        db.commit()
+        return True

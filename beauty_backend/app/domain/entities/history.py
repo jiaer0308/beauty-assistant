@@ -30,9 +30,11 @@ class RecommendationSession(Base):
     
     # The season assigned during this session (FK reference until seasons table exists)
     season_id = Column(Integer, nullable=True)
-    
-    # Reference to the selfie image used for analysis
-    image_path = Column(String(255), nullable=True)
+
+    # Path to the selfie used for this analysis (optional)
+    image_path = Column(String, nullable=True)
+
+    is_archived = Column(Boolean, default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

@@ -27,28 +27,48 @@ class QuizData(BaseModel):
     """
     skin_type: str | None = Field(
         default=None,
-        examples=["oily", "dry", "combination", "normal"],
+        examples=["Oily", "Dry", "Combination", "Normal"],
         description="Self-reported skin type",
     )
     sun_reaction: str | None = Field(
         default=None,
-        examples=["always_burn", "tan_easily", "rarely_burn"],
+        examples=["Burn easily, rarely tan", "Burn first, then tan", "Tan easily, rarely burn"],
         description="How the user's skin reacts to sun exposure",
     )
-    vein_color: str | None = Field(
+    wrist_vein: str | None = Field(
         default=None,
-        examples=["blue_purple", "green", "both"],
-        description="Wrist vein colour (blue/purple → cool, green → warm)",
+        examples=["Blue or Purple", "Green or Olive", "Mixed / Unsure"],
+        description="Wrist vein colour (cool vs warm indicator)",
     )
-    natural_hair_color: str | None = Field(
+    hair_color: str | None = Field(
         default=None,
-        examples=["black", "dark_brown", "light_brown", "blonde", "red", "grey"],
-        description="User's natural (undyed) hair colour",
+        examples=["Black", "Warm Brown", "Ashy Blonde", "Golden Blonde"],
+        description="User's hair colour / depth",
     )
-    jewelry_preference: str | None = Field(
+    jewelry: str | None = Field(
         default=None,
-        examples=["gold", "silver", "both"],
+        examples=["Silver / White Gold", "Yellow Gold", "Rose Gold"],
         description="Which metal tone flatters the user most",
+    )
+    foundation_coverage: str | None = Field(
+        default=None,
+        examples=["Sheer / Light", "Medium", "Full Coverage"],
+        description="Preferred foundation coverage level",
+    )
+    makeup_finish: str | None = Field(
+        default=None,
+        examples=["Matte", "Dewy", "Natural / Satin"],
+        description="Preferred makeup finish",
+    )
+    skin_concerns: List[str] | None = Field(
+        default=None,
+        examples=[["Redness", "Acne", "Fine Lines"]],
+        description="User's skin concerns for product filtering",
+    )
+    lip_style: str | None = Field(
+        default=None,
+        examples=["MLBB (Nudes/Balms)", "Bold", "Glossy"],
+        description="Preferred lipstick style",
     )
 
 

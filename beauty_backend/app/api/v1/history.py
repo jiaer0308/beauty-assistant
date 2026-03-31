@@ -71,3 +71,38 @@ def get_session_detail(
         )
         
     return session_detail
+
+@router.delete(
+    "/{session_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a recommendation session",
+    description="Deletes a specific analysis session and its associated products."
+)
+def delete_session(
+    session_id: int,
+    current_user: CurrentUserDep,
+    db: DBDep
+):
+    """
+    DELETE /api/v1/history/{session_id}
+    
+    Args:
+        session_id (int): The ID of the session to delete
+        
+    Raises:
+        HTTPException 403: If the session does not belong to the user
+        HTTPException 404: If the session does not exist
+    """
+    # 1. Fetch the session details to verify ownership
+    session_detail = HistoryService.get_session_detail(db, session_id)
+    
+    # 2. Security Check: Ensure the session belongs to the current user
+    if session_detail.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete this recommendation session."
+        )
+        
+    # 3. Delete the session
+    HistoryService.archive_session(db, session_id)
+    return None

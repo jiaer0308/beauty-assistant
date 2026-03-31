@@ -83,7 +83,7 @@ Analyzes an image for seasonal color classification.
   "status": "success",
   "data": {
     "result": {
-      "season": "deep_autumn",
+      "season": "dark_autumn",
       "display_name": "Deep Autumn",
       "confidence": 0.88
     },

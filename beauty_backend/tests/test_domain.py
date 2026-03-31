@@ -92,38 +92,38 @@ class TestSeasonalSeason:
     
     def test_season_values(self):
         """Test that season values are correct"""
-        assert SeasonalSeason.DEEP_WINTER.value == "deep_winter"
+        assert SeasonalSeason.DARK_WINTER.value == "dark_winter"
         assert SeasonalSeason.LIGHT_SPRING.value == "light_spring"
     
     def test_display_name(self):
         """Test display name generation"""
-        assert SeasonalSeason.DEEP_WINTER.display_name == "Deep Winter"
+        assert SeasonalSeason.DARK_WINTER.display_name == "Dark Winter"
         assert SeasonalSeason.CLEAR_SPRING.display_name == "Clear Spring"
     
     def test_family_detection(self):
         """Test season family detection"""
-        assert SeasonalSeason.DEEP_WINTER.family == "Winter"
+        assert SeasonalSeason.DARK_WINTER.family == "Winter"
         assert SeasonalSeason.LIGHT_SUMMER.family == "Summer"
-        assert SeasonalSeason.DEEP_AUTUMN.family == "Autumn"
+        assert SeasonalSeason.DARK_AUTUMN.family == "Autumn"
         assert SeasonalSeason.CLEAR_SPRING.family == "Spring"
     
     def test_temperature_detection(self):
         """Test warm/cool detection"""
         # Cool seasons: Winter, Summer
-        assert SeasonalSeason.DEEP_WINTER.is_cool is True
-        assert SeasonalSeason.DEEP_WINTER.is_warm is False
+        assert SeasonalSeason.DARK_WINTER.is_cool is True
+        assert SeasonalSeason.DARK_WINTER.is_warm is False
         assert SeasonalSeason.LIGHT_SUMMER.is_cool is True
         
         # Warm seasons: Autumn, Spring
-        assert SeasonalSeason.DEEP_AUTUMN.is_warm is True
-        assert SeasonalSeason.DEEP_AUTUMN.is_cool is False
+        assert SeasonalSeason.DARK_AUTUMN.is_warm is True
+        assert SeasonalSeason.DARK_AUTUMN.is_cool is False
         assert SeasonalSeason.WARM_SPRING.is_warm is True
     
     def test_contrast_detection(self):
         """Test high/low contrast detection"""
         # High contrast: Winter, Autumn
-        assert SeasonalSeason.DEEP_WINTER.has_high_contrast is True
-        assert SeasonalSeason.DEEP_AUTUMN.has_high_contrast is True
+        assert SeasonalSeason.DARK_WINTER.has_high_contrast is True
+        assert SeasonalSeason.DARK_AUTUMN.has_high_contrast is True
         
         # Low contrast: Summer, Spring
         assert SeasonalSeason.LIGHT_SUMMER.has_high_contrast is False
@@ -137,7 +137,7 @@ class TestSeasonResult:
     def valid_result_data(self):
         """Fixture providing valid result data"""
         return {
-            "season": SeasonalSeason.DEEP_AUTUMN,
+            "season": SeasonalSeason.DARK_AUTUMN,
             "confidence": 0.88,
             "contrast_score": 52.4,
             "skin_temperature": "warm",
@@ -151,7 +151,7 @@ class TestSeasonResult:
     def test_valid_result_creation(self, valid_result_data):
         """Test creating valid SeasonResult"""
         result = SeasonResult(**valid_result_data)
-        assert result.season == SeasonalSeason.DEEP_AUTUMN
+        assert result.season == SeasonalSeason.DARK_AUTUMN
         assert result.confidence == 0.88
         assert isinstance(result.timestamp, datetime)
     
@@ -201,7 +201,7 @@ class TestSeasonResult:
         """Test computed properties"""
         result = SeasonResult(**valid_result_data)
         
-        assert result.display_name == "Deep Autumn"
+        assert result.display_name == "Dark Autumn"
         assert result.season_family == "Autumn"
         assert result.confidence_percentage == 88.0
     
@@ -216,8 +216,8 @@ class TestSeasonResult:
         assert "debug_info" in data
         
         # Check result section
-        assert data["result"]["season"] == "deep_autumn"
-        assert data["result"]["display_name"] == "Deep Autumn"
+        assert data["result"]["season"] == "dark_autumn"
+        assert data["result"]["display_name"] == "Dark Autumn"
         assert data["result"]["confidence"] == 0.88
         
         # Check metrics section
@@ -234,13 +234,13 @@ class TestSeasonResult:
         result = SeasonResult(**valid_result_data)
         
         str_repr = str(result)
-        assert "Deep Autumn" in str_repr
+        assert "Dark Autumn" in str_repr
         assert "88%" in str_repr
         assert "warm" in str_repr
         
         repr_str = repr(result)
         assert "SeasonResult" in repr_str
-        assert "deep_autumn" in repr_str
+        assert "dark_autumn" in repr_str
 
 
 if __name__ == "__main__":

@@ -46,3 +46,24 @@ CREATE INDEX `idx_user_guest_token` ON `users` (`guest_token`);
 CREATE INDEX `idx_session_user_id` ON `recommendation_sessions` (`user_id`);
 CREATE INDEX `idx_item_session_id` ON `recommendation_items` (`session_id`);
 CREATE INDEX `idx_item_cosmetic_id` ON `recommendation_items` (`cosmetic_id`);
+
+
+-- 1. Add the reset_password_token column
+ALTER TABLE users ADD COLUMN reset_password_token VARCHAR(255);
+
+-- 2. Create a unique index for quick token lookups
+CREATE UNIQUE INDEX ix_users_reset_password_token ON users (reset_password_token);
+
+-- 3. Add the reset_password_expires column
+ALTER TABLE users ADD COLUMN reset_password_expires DATETIME;
+
+
+-- Step 1: Add the new boolean column
+ALTER TABLE `recommendation_sessions` 
+ADD COLUMN `is_archived` BOOLEAN NOT NULL DEFAULT FALSE AFTER `season_id`;
+
+-- Step 2: Drop the old image_path column
+ALTER TABLE `recommendation_sessions` 
+DROP COLUMN `image_path`;
+
+ALTER TABLE `recommendation_sessions` ADD COLUMN `image_path` VARCHAR(255) NULL;

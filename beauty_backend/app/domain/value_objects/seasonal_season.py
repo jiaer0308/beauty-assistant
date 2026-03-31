@@ -24,7 +24,7 @@ class SeasonalSeason(str, Enum):
     """
     
     # ========== WINTER FAMILY (Cool + High Contrast) ==========
-    DEEP_WINTER = "deep_winter"
+    DARK_WINTER = "dark_winter"
     """
     Deep Winter: Cool + Very High Contrast + Medium Chroma
     - Dark hair, light cool skin, medium eye color
@@ -32,7 +32,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Pure, saturated jewel tones
     """
     
-    COOL_WINTER = "cool_winter"
+    TRUE_WINTER = "true_winter"
     """
     Cool Winter: Very Cool + High Contrast + Low Chroma
     - Ashy dark hair, cool medium skin, soft eyes
@@ -40,7 +40,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Icy, cool tones with blue undertones
     """
     
-    CLEAR_WINTER = "clear_winter"
+    BRIGHT_WINTER = "bright_winter"
     """
     Clear Winter: Cool + High Contrast + High Chroma
     - Dark hair, fair skin, bright clear eyes
@@ -57,7 +57,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Soft, muted pastels with cool undertones
     """
     
-    COOL_SUMMER = "cool_summer"
+    TRUE_SUMMER = "true_summer"
     """
     Cool Summer: Very Cool + Medium Contrast + Low Chroma
     - Medium ashy hair, cool medium skin, soft eyes
@@ -74,7 +74,7 @@ class SeasonalSeason(str, Enum):
     """
     
     # ========== AUTUMN FAMILY (Warm + High Contrast) ==========
-    DEEP_AUTUMN = "deep_autumn"
+    DARK_AUTUMN = "dark_autumn"
     """
     Deep Autumn: Warm + High Contrast + Medium Chroma
     - Dark rich hair, warm deep skin, dark eyes
@@ -82,7 +82,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Deep, warm, earthy tones
     """
     
-    WARM_AUTUMN = "warm_autumn"
+    TRUE_AUTUMN = "true_autumn"
     """
     Warm Autumn: Very Warm + Medium Contrast + Medium Chroma
     - Golden/auburn hair, warm skin, warm eyes
@@ -107,7 +107,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Light, fresh, warm pastels
     """
     
-    WARM_SPRING = "warm_spring"
+    TRUE_SPRING = "true_spring"
     """
     Warm Spring: Very Warm + Low Contrast + High Chroma
     - Golden/red hair, peachy warm skin, warm eyes
@@ -115,7 +115,7 @@ class SeasonalSeason(str, Enum):
     - Best colors: Warm, clear, golden tones
     """
     
-    CLEAR_SPRING = "clear_spring"
+    BRIGHT_SPRING = "bright_spring"
     """
     Clear Spring: Warm + Medium Contrast + High Chroma
     - Bright hair, clear skin, bright clear eyes

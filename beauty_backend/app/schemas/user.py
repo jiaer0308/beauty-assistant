@@ -85,6 +85,18 @@ class UserResponse(BaseModel):
     token: Token
 
 
+
 class TokenData(BaseModel):
     """Internal JWT payload representation for user identification."""
     user_id: int | None = Field(default=None, description="Decoded user ID from the token")
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Request schema for forgot password."""
+    email: str = Field(..., examples=["user@example.com"])
+
+
+class ResetPasswordRequest(BaseModel):
+    """Request schema for resetting password."""
+    token: str = Field(..., description="The reset token received via email")
+    new_password: str = Field(..., min_length=8, description="The new password")

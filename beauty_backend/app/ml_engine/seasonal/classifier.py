@@ -38,23 +38,23 @@ logger = logging.getLogger(__name__)
 # Enum has: "Deep Winter", "Cool Winter", "Clear Winter"
 NAME_MAPPING = {
     # WINTER
-    "Dark Winter": "Deep Winter",
-    "True Winter": "Cool Winter", 
-    "Bright Winter": "Clear Winter",
+    "Dark Winter": "Dark Winter",
+    "True Winter": "True Winter", 
+    "Bright Winter": "Bright Winter",
     
     # SPRING
     "Light Spring": "Light Spring",  # Same
-    "True Spring": "Warm Spring",
-    "Bright Spring": "Clear Spring",
+    "True Spring": "True Spring",
+    "Bright Spring": "Bright Spring",
     
     # SUMMER
     "Light Summer": "Light Summer",  # Same
-    "True Summer": "Cool Summer",
+    "True Summer": "True Summer",
     "Soft Summer": "Soft Summer",    # Same
     
     # AUTUMN
-    "Dark Autumn": "Deep Autumn",
-    "True Autumn": "Warm Autumn",
+    "Dark Autumn": "Dark Autumn",
+    "True Autumn": "True Autumn",
     "Soft Autumn": "Soft Autumn"     # Same
 }
 

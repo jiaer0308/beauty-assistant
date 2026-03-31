@@ -16,7 +16,7 @@ def fixture_db_session():
     db = SessionLocal()
     
     # Seed data
-    winter = Season(name="deep_winter", description="Deep Winter")
+    winter = Season(name="dark_winter", description="Dark Winter")
     db.add(winter)
     db.commit()
     
@@ -55,7 +55,7 @@ def fixture_db_session():
 
 def test_get_recommendations_basic(db_session: Session):
     mapper = RecommendationMapper()
-    recs = mapper.get_recommendations("deep_winter", db_session)
+    recs = mapper.get_recommendations("dark_winter", db_session)
     
     assert "best_colors" in recs
     assert recs["best_colors"][0]["name"] == "True Red"

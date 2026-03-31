@@ -4,6 +4,7 @@ Authentication and User Identity Service
 """
 
 import uuid
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -123,4 +124,96 @@ class AuthService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
             
+        return UserOut.model_validate(db_user)
+
+    @staticmethod
+    def forgot_password(db: Session, email: str) -> str:
+        """
+        Generates a password reset token for a user.
+        
+        Args:
+            db (Session): Database session
+            email (str): User's email address
+            
+        Returns:
+            str: The generated reset token
+            
+        Raises:
+            HTTPException: If user not found, or is a guest
+        """
+        db_user = db.query(User).filter(User.email == email).first()
+        if not db_user or db_user.is_guest:
+            # For security, we might want to return 200 even if the email doesn't exist.
+            # However, for this implementation, we will raise an error so the frontend
+            # knows the email is invalid.
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found or is a guest"
+            )
+            
+        reset_token = str(uuid.uuid4())
+        # Set expiration to 1 hour from now
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)
+        
+        db_user.reset_password_token = reset_token
+        db_user.reset_password_expires = expires
+        
+        db.add(db_user)
+        db.commit()
+        
+        # In a real environment, this token would be EMAILED to the user.
+        # Since we have no email infrastructure, returning the token directly.
+        return reset_token
+
+    @staticmethod
+    def reset_password(db: Session, token: str, new_password: str) -> UserOut:
+        """
+        Resets a user's password using a valid reset token.
+        
+        Args:
+            db (Session): Database session
+            token (str): The reset token
+            new_password (str): The new password to set
+            
+        Returns:
+            UserOut: The updated user profile
+            
+        Raises:
+            HTTPException: If token is invalid or expired
+        """
+        db_user = db.query(User).filter(User.reset_password_token == token).first()
+        
+        if not db_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid reset token"
+            )
+            
+        # Check if token is expired
+        if not db_user.reset_password_expires or db_user.reset_password_expires.tzinfo is None:
+            # If naive datetime in DB, convert to aware for comparison
+            # Assuming DB stores UTC if naive
+            now = datetime.now(timezone.utc)
+            expires = db_user.reset_password_expires.replace(tzinfo=timezone.utc) if db_user.reset_password_expires else now
+        else:
+            now = datetime.now(timezone.utc)
+            expires = db_user.reset_password_expires
+            
+        if now > expires:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Reset token has expired"
+            )
+            
+        # Token is valid, update password
+        db_user.password_hash = get_password_hash(new_password)
+        
+        # Clear token fields
+        db_user.reset_password_token = None
+        db_user.reset_password_expires = None
+        
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
         return UserOut.model_validate(db_user)

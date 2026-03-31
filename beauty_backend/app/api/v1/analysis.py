@@ -101,6 +101,7 @@ async def analyze_image(
     # 1. Parse & validate quiz_data
     # ------------------------------------------------------------------ #
     try:
+        print(f"==== RAW QUIZ DATA FROM FE ====\n{quiz_data}\n===============================")
         logger.info(f"Parsing quiz_data: {quiz_data}")
         parsed_quiz = QuizData.model_validate_json(quiz_data)
     except Exception as exc:
@@ -176,42 +177,12 @@ async def analyze_image(
     # ------------------------------------------------------------------ #
     # Fetch recommendations from Database if available, else fallback to JSON
     # result.season.value is the machine name like 'soft_autumn'
-    db_season = db.query(SeasonModel).filter(SeasonModel.name == result.season.value).first()
-    
-    if db_season:
-        logger.info("Fetching recommendations from database for season: %s", db_season.name)
-        # Filter colors by category_type
-        best_colors = [
-            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
-            for sc in db_season.colors if sc.category_type == "best"
-        ]
-        neutral_colors = [
-            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
-            for sc in db_season.colors if sc.category_type == "neutral"
-        ]
-        avoid_colors = [
-            ColorSwatch(name=sc.color.name, hex=sc.color.hex_code)
-            for sc in db_season.colors if sc.category_type == "avoid"
-        ]
-        
-        # Map cosmetics to schema
-        cosmetics = [
-            CosmeticProduct(
-                category=p.category.name,
-                brand=p.brand.name,
-                shade=f"{p.product_name} - {p.shade_name}",
-                hex=p.hex_code or "#000000"
-            )
-            for p in db_season.cosmetics
-        ]
-    else:
-        logger.warning("Season %s not found in DB knowledge base, falling back to JSON", result.season.value)
-        # Fallback to the recommendations already loaded in the result (from JSON)
-        recs_raw = result.recommendations or {}
-        best_colors    = [ColorSwatch(**c) for c in recs_raw.get("best_colors", [])]
-        neutral_colors = [ColorSwatch(**c) for c in recs_raw.get("neutral_colors", [])]
-        avoid_colors   = [ColorSwatch(**c) for c in recs_raw.get("avoid_colors", [])]
-        cosmetics      = [CosmeticProduct(**p) for p in recs_raw.get("cosmetics", [])]
+    recs_raw = result.recommendations or {}
+    best_colors    = [ColorSwatch(**c) for c in recs_raw.get("best_colors", [])]
+    neutral_colors = [ColorSwatch(**c) for c in recs_raw.get("neutral_colors", [])]
+    avoid_colors   = [ColorSwatch(**c) for c in recs_raw.get("avoid_colors", [])]
+    cosmetics      = [CosmeticProduct(**p) for p in recs_raw.get("cosmetics", [])]
+
 
     recommendations = Recommendations(
         color_palette=ColorPalette(

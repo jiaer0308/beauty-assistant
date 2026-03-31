@@ -6,6 +6,7 @@ Provides shared dependencies for the API layer via FastAPI's
 Depends() injection system.
 """
 
+import logging
 from typing import Annotated, Optional
 
 from fastapi import Depends, Request, HTTPException, status
@@ -18,6 +19,7 @@ from app.core.database import get_db
 from app.domain.entities.user import User
 from app.services.sca_workflow_service import SCAWorkflowService
 
+logger = logging.getLogger(__name__)
 
 # Token extraction from Authorization header
 oauth2_scheme = OAuth2PasswordBearer(
@@ -49,14 +51,13 @@ def get_current_user(
     Returns the User model (can be a guest or registered user).
     Raises 401 Unauthorized if no valid identity is found.
     """
+    logger.info("── get_current_user ─────────────────────────────")
+    logger.info("  Path: %s %s", request.method, request.url.path)
+    logger.info("  JWT present: %s", "YES" if token else "NO")
+
     # 1. Try JWT Token First (Registered Users)
     if token:
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        
+        logger.info("  Attempting JWT decode…")
         try:
             payload = jwt.decode(
                 token, 
@@ -67,18 +68,39 @@ def get_current_user(
             if user_id_str:
                 user = db.query(User).filter(User.id == int(user_id_str)).first()
                 if user:
+                    logger.info("  ✓ JWT Auth OK — user_id=%d", user.id)
                     return user
-        except (JWTError, ValueError):
-            pass
+                else:
+                    logger.warning("  ✗ JWT sub=%s not found in DB", user_id_str)
+            else:
+                logger.warning("  ✗ JWT payload missing 'sub' field")
+        except (JWTError, ValueError) as e:
+            logger.warning("  ✗ JWT decode error: %s", e)
 
     # 2. Try X-Guest-Token Header (Anonymous Flow)
     guest_token = request.headers.get("X-Guest-Token")
+    logger.info(
+        "  X-Guest-Token: %s",
+        f"{guest_token[:8]}…" if guest_token else "NOT PRESENT"
+    )
+
     if guest_token:
         user = db.query(User).filter(User.guest_token == guest_token).first()
         if user:
+            logger.info("  ✓ Guest Auth OK — user_id=%d", user.id)
             return user
+        else:
+            logger.warning(
+                "  ✗ X-Guest-Token '%s…' not found in DB — token may be stale",
+                guest_token[:8]
+            )
             
     # 3. No valid identity found
+    logger.error(
+        "  ✗ Authentication FAILED for %s %s — returning 401",
+        request.method, request.url.path
+    )
+    logger.info("─────────────────────────────────────────────────")
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Authentication required (Valid JWT or X-Guest-Token expected)",

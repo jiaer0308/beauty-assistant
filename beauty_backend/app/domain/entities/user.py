@@ -23,6 +23,10 @@ class User(Base):
     password_hash = Column(String(255), nullable=True)
     guest_token = Column(String(255), unique=True, index=True, nullable=True)
     
+    # Password reset fields
+    reset_password_token = Column(String(255), unique=True, index=True, nullable=True)
+    reset_password_expires = Column(DateTime(timezone=True), nullable=True)
+    
     # ID from the 'seasons' table in the knowledge base
     # For now, this is just an integer reference until the seasons model is implemented
     current_season_id = Column(Integer, nullable=True)

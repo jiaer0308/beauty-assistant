@@ -1,5 +1,5 @@
 {
-  "deep_winter": {
+  "dark_winter": {
     "best_colors": [
       {"name": "True Red",        "hex": "#C8102E"},
       {"name": "Royal Blue",      "hex": "#002366"},
@@ -30,7 +30,7 @@
     ]
   },
 
-  "cool_winter": {
+  "true_winter": {
     "best_colors": [
       {"name": "Ice Blue",        "hex": "#99C5C4"},
       {"name": "Pure Black",      "hex": "#0A0A0A"},
@@ -61,7 +61,7 @@
     ]
   },
 
-  "clear_winter": {
+  "bright_winter": {
     "best_colors": [
       {"name": "Ice Pink",        "hex": "#FFB7D5"},
       {"name": "Electric Blue",   "hex": "#007FFF"},
@@ -123,7 +123,7 @@
     ]
   },
 
-  "cool_summer": {
+  "true_summer": {
     "best_colors": [
       {"name": "Soft Rose",       "hex": "#DEBCC0"},
       {"name": "Dusty Blue",      "hex": "#6E90B0"},
@@ -185,7 +185,7 @@
     ]
   },
 
-  "deep_autumn": {
+  "dark_autumn": {
     "best_colors": [
       {"name": "Chocolate Brown", "hex": "#7B3F00"},
       {"name": "Forest Green",    "hex": "#228B22"},
@@ -216,7 +216,7 @@
     ]
   },
 
-  "warm_autumn": {
+  "true_autumn": {
     "best_colors": [
       {"name": "Terracotta",      "hex": "#C87941"},
       {"name": "Warm Olive",      "hex": "#8A9A5B"},
@@ -309,7 +309,7 @@
     ]
   },
 
-  "warm_spring": {
+  "true_spring": {
     "best_colors": [
       {"name": "Warm Coral",      "hex": "#FF6B6B"},
       {"name": "Golden Yellow",   "hex": "#FFD700"},
@@ -340,7 +340,7 @@
     ]
   },
 
-  "clear_spring": {
+  "bright_spring": {
     "best_colors": [
       {"name": "Bright Coral",    "hex": "#FF6047"},
       {"name": "Clear Aqua",      "hex": "#00B2CA"},

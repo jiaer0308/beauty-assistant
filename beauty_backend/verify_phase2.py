@@ -79,16 +79,16 @@ def test_seasonal_season():
         print(f"  ✅ All 12 seasons defined")
         
         # Test display names
-        deep_winter = SeasonalSeason.DEEP_WINTER
-        print(f"  Season: {deep_winter.value}")
-        print(f"  Display Name: {deep_winter.display_name}")
-        print(f"  Family: {deep_winter.family}")
-        print(f"  Temperature: {deep_winter.is_cool and 'cool' or 'warm'}")
-        print(f"  Contrast: {deep_winter.has_high_contrast and 'high' or 'low'}")
+        dark_winter = SeasonalSeason.DARK_WINTER
+        print(f"  Season: {dark_winter.value}")
+        print(f"  Display Name: {dark_winter.display_name}")
+        print(f"  Family: {dark_winter.family}")
+        print(f"  Temperature: {dark_winter.is_cool and 'cool' or 'warm'}")
+        print(f"  Contrast: {dark_winter.has_high_contrast and 'high' or 'low'}")
         
         # Test properties
-        assert deep_winter.is_cool is True
-        assert deep_winter.has_high_contrast is True
+        assert dark_winter.is_cool is True
+        assert dark_winter.has_high_contrast is True
         print("  ✅ Properties working correctly")
         
         # List all seasons
@@ -118,7 +118,7 @@ def test_season_result():
         
         # Create valid result
         result = SeasonResult(
-            season=SeasonalSeason.DEEP_AUTUMN,
+            season=SeasonalSeason.DARK_AUTUMN,
             confidence=0.88,
             contrast_score=52.4,
             skin_temperature="warm",
@@ -146,7 +146,7 @@ def test_season_result():
         # Test validation
         try:
             invalid = SeasonResult(
-                season=SeasonalSeason.DEEP_AUTUMN,
+                season=SeasonalSeason.DARK_AUTUMN,
                 confidence=1.5,  # Invalid: > 1.0
                 contrast_score=52.4,
                 skin_temperature="warm",

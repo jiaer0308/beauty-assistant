@@ -31,17 +31,18 @@ The backend `QuizData` model will be updated to match the Flutter `state.answers
 
 ### B. `app/services/quiz_engine.py`
 - Update `_build_quiz_adjustment` to call handlers with new field names.
-- Rename handler methods and internal logic:
-    - `_apply_vein_color` -> `_apply_wrist_vein`
-    - `_apply_jewelry_preference` -> `_apply_jewelry`
-    - `_apply_natural_hair_color` -> `_apply_hair_color`
+- Rename handler methods and internal logic to use **exact Flutter strings**:
+    - **`wrist_vein`**: `Blue or Purple`, `Green or Olive`, `Mixed / Unsure`
+    - **`jewelry`**: `Silver / White Gold`, `Yellow Gold`, `Rose Gold`
+    - **`sun_reaction`**: `Burn easily, rarely tan`, `Burn first, then tan`, `Tan easily, rarely burn`
+    - **`hair_color`**: `Black`, `Warm Brown`, `Ashy Blonde`, `Golden Blonde`
 - Ensure mappings for new option strings (e.g., "Silver / White Gold" instead of "silver").
 
 ### C. `app/services/recommendation_mapper.py`
 - Update dynamic filtering logic to utilize the 4 new preference fields:
     - **Coverage:** If `foundation_coverage == 'Sheer / Light'`, filter Foundations.
     - **Skin Type:** If `skin_type == 'Oily'`, exclude "Cream" categories.
-    - **Lip Style:** If `lip_style == 'MLBB'`, filter for nudes/balms.
+    - **Lip Style:** If `lip_style == 'MLBB (Nudes/Balms)'`, filter for nudes/balms.
 
 ## 4. Testing & Validation
 - **Schema Validation:** Verify the API accepts the full 9-field JSON payload from Flutter.

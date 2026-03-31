@@ -307,8 +307,9 @@ class SCAWorkflowService:
 
         # Load colour + cosmetic recommendations
         try:
+            quiz_dict = quiz_data.dict() if quiz_data else None
             recs = self.recommendation_mapper.get_recommendations(
-                season.value, db, quiz_data.dict() if quiz_data else None
+                season.value, db, quiz_dict
             )
         except ValueError:
             logger.warning("No recommendations for %s — returning empty dict", season.value)
@@ -354,19 +355,32 @@ class SCAWorkflowService:
         # ========== Task 7: Save History & Update User ==========
         # Mapping for Season enum to Database ID (1-12)
         season_id_map = {
-            "clear_spring": 1,
-            "warm_spring": 2,
+            "bright_spring": 1,
+            "true_spring": 2,
             "light_spring": 3,
             "light_summer": 4,
-            "cool_summer": 5,
+            "true_summer": 5,
             "soft_summer": 6,
             "soft_autumn": 7,
-            "warm_autumn": 8,
-            "deep_autumn": 9,
-            "deep_winter": 10,
-            "cool_winter": 11,
-            "clear_winter": 12,
+            "true_autumn": 8,
+            "dark_autumn": 9,
+            "dark_winter": 10,
+            "true_winter": 11,
+            "bright_winter": 12,
         }
+
+#         bright_spring
+# true_spring
+# light_spring
+# light_summer
+# true_summer
+# soft_summer
+# soft_autumn
+# true_autumn
+# dark_autumn
+# dark_winter
+# true_winter
+# bright_winter
         season_id = season_id_map.get(result.season.value)
 
         # Extract cosmetic_ids from the analysis result (if they exist)
