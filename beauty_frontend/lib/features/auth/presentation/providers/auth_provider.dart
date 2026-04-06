@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../services/api/auth_service.dart';
 import '../../../../services/storage/token_storage_service.dart';
@@ -30,7 +31,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           state = state.copyWith(status: AuthStatus.authenticated, token: token, email: email);
         } catch (e) {
           // Token is invalid (e.g., expired or user deleted)
-          print('Token verification failed: $e');
+          debugPrint('Token verification failed: $e');
           await _tokenStorage.deleteToken(); // Clean up invalid token
           
           if (guestToken != null) {

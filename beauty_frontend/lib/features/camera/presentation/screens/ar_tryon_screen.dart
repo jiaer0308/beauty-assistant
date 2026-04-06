@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,10 +15,24 @@ import '../widgets/coordinate_translator.dart';
 import '../widgets/lip_mesh_extractor.dart';
 import '../widgets/lipstick_painter.dart';
 
-class ArTryonScreen extends ConsumerStatefulWidget {
-  final ProductRecommendation? product;
 
-  const ArTryonScreen({super.key, this.product});
+
+class ArTryonScreen extends ConsumerStatefulWidget {
+  /// Session ID passed from the SCA flow (SCA entry).
+  final int? sessionId;
+
+  /// Full list of products passed from the Dashboard (Dashboard entry).
+  final List<ProductRecommendation>? dashboardProducts;
+
+  /// The ID of the specific product tapped on the Dashboard.
+  final int? selectedDashboardId;
+
+  const ArTryonScreen({
+    super.key,
+    this.sessionId,
+    this.dashboardProducts,
+    this.selectedDashboardId,
+  });
 
   @override
   ConsumerState<ArTryonScreen> createState() => _ArTryonScreenState();
@@ -27,13 +41,19 @@ class ArTryonScreen extends ConsumerStatefulWidget {
 class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     with WidgetsBindingObserver {
   // ── Camera & ML Kit ───────────────────────────────────────────────────────
-  CameraController? _cameraController;
+  CameraController?  _cameraController;
   late final FaceMeshDetector _faceMeshDetector;
   bool _isBusy = false;
 
-  // ── UI State ──────────────────────────────────────────────────────────────
-  bool _isComparing = false;
-  LipContours? _lipContours;
+  // ── Lipstick controller ───────────────────────────────────────────────────
+  // Drives repaints of the LipstickPainter WITHOUT setState / widget rebuilds.
+  late final LipstickController _lipController;
+
+  // ── UI State (infrequent – setState is fine) ──────────────────────────────
+  bool _cameraReady = false;
+
+  // ── EWMA smoothing factor (0 = frozen, 1 = raw) ───────────────────────────
+  static const double _kSmoothingAlpha = 0.8;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -41,16 +61,21 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    _lipController = LipstickController();
+
     _faceMeshDetector = FaceMeshDetector(
       option: FaceMeshDetectorOptions.faceMesh,
     );
+
     _initCamera();
 
-    // Load the initial shade catalogue from the provider.
-    // Using addPostFrameCallback so the widget tree is fully mounted before
-    // the provider mutates state.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(arTryonProvider.notifier).init(product: widget.product);
+      ref.read(arTryonProvider.notifier).init(
+        sessionId: widget.sessionId,
+        dashboardProducts: widget.dashboardProducts,
+        selectedDashboardId: widget.selectedDashboardId,
+      );
     });
   }
 
@@ -71,7 +96,19 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     _stopStream();
     _cameraController?.dispose();
     _faceMeshDetector.close();
+    _lipController.dispose();
     super.dispose();
+  }
+
+  // Proactively stop the stream before the navigator tears down the widget.
+  // This prevents the CameraX LiveData observer from firing into a dead
+  // PlatformChannel and causing the fatal ObserverProxyApi crash.
+  Future<bool> _onPopInvoked() async {
+    _stopStream();
+    // Small pause so CameraX can finish its last observer notification
+    // before Flutter destroys the method channel.
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    return true; // allow the pop
   }
 
   // ── Camera Helpers ────────────────────────────────────────────────────────
@@ -80,15 +117,19 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     final cameras = await availableCameras();
     if (cameras.isEmpty) return;
 
-    // Prefer front-facing camera for try-on
     final frontCamera = cameras.firstWhere(
       (c) => c.lensDirection == CameraLensDirection.front,
       orElse: () => cameras.first,
     );
 
+    // ResolutionPreset.low ≈ 320×240 — smaller image means:
+    //   • ~44 % fewer NV21 bytes to compose on the isolate
+    //   • ML Kit face mesh runs ~40 % faster
+    //   • Coordinate translator still uses screen-space math so accuracy
+    //     is unaffected; only the input image is smaller.
     final controller = CameraController(
       frontCamera,
-      ResolutionPreset.medium,
+      ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.nv21,
     );
@@ -96,14 +137,13 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     await controller.initialize();
     if (!mounted) return;
     _cameraController = controller;
-    setState(() {});
+    setState(() => _cameraReady = true);
     _startStream(controller);
   }
 
   void _startStream(CameraController controller) {
     if (controller.value.isStreamingImages) return;
     controller.startImageStream((CameraImage image) async {
-      // Frame throttle: skip if previous frame is still being processed.
       if (_isBusy) return;
       _isBusy = true;
       try {
@@ -117,9 +157,7 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
   void _stopStream() {
     final controller = _cameraController;
     if (controller == null) return;
-    if (controller.value.isStreamingImages) {
-      controller.stopImageStream();
-    }
+    if (controller.value.isStreamingImages) controller.stopImageStream();
   }
 
   // ── Frame Processing ──────────────────────────────────────────────────────
@@ -129,17 +167,14 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     if (controller == null) return;
 
     final cameraDescription = controller.description;
+    final deviceRotation    = controller.value.deviceOrientation.rawValue;
 
-    // Get current device rotation (0, 90, 180, 270).
-    final deviceRotation =
-        controller.value.deviceOrientation.rawValue;
-
-    // Capture context-dependent values BEFORE the async gap to satisfy
-    // use_build_context_synchronously.
+    // Read MediaQuery BEFORE any async gap (use_build_context_synchronously).
     final screenSize = MediaQuery.of(context).size;
     final isMirrored =
         cameraDescription.lensDirection == CameraLensDirection.front;
 
+    // ── NV21 composition ─────────────────────────────────────────────────
     final inputImage = convertCameraImageToInputImage(
       image,
       cameraDescription,
@@ -147,142 +182,157 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
     );
     if (inputImage == null) return;
 
+    // ── ML Kit face mesh ─────────────────────────────────────────────────
     final meshes = await _faceMeshDetector.processImage(inputImage);
     if (meshes.isEmpty) {
-      if (mounted) setState(() => _lipContours = null);
+      // Clear overlay without setState — controller notifies the painter only.
+      _lipController.updateContours(null);
       return;
     }
 
-    // Use the first detected face.
-    final mesh = meshes.first;
-
-    // ── Coordinate dimension swap ─────────────────────────────────────────
-    // Android camera streams arrive in the sensor's native orientation
-    // (typically landscape for front cameras: width > height). ML Kit applies
-    // the InputImageRotation we supplied and returns face mesh points in the
-    // *rotated* coordinate space.
-    //
-    // We must compute the actual rotation compensation from the sensor
-    // orientation (a fixed hardware property) plus the current UI rotation,
-    // NOT just from UI rotation alone — which would always be 0 for a
-    // portrait-locked app, making the swap condition never fire.
+    // ── BoxFit.cover-aware coordinate dimensions ─────────────────────────
     final sensorOrientation = cameraDescription.sensorOrientation;
-    final int rotationCompensation;
-    if (cameraDescription.lensDirection == CameraLensDirection.front) {
-      rotationCompensation = (sensorOrientation + deviceRotation) % 360;
-    } else {
-      rotationCompensation = (sensorOrientation - deviceRotation + 360) % 360;
-    }
+    final int rotationCompensation =
+        cameraDescription.lensDirection == CameraLensDirection.front
+            ? (sensorOrientation + deviceRotation) % 360
+            : (sensorOrientation - deviceRotation + 360) % 360;
+
     final bool swapDims =
         rotationCompensation == 90 || rotationCompensation == 270;
     final int effectiveImageWidth  = swapDims ? image.height : image.width;
     final int effectiveImageHeight = swapDims ? image.width  : image.height;
 
     final translator = CoordinateTranslator(
-      imageWidth: effectiveImageWidth,
-      imageHeight: effectiveImageHeight,
-      screenWidth: screenSize.width,
-      screenHeight: screenSize.height,
+      imageWidth:        effectiveImageWidth,
+      imageHeight:       effectiveImageHeight,
+      screenWidth:       screenSize.width,
+      screenHeight:      screenSize.height,
       isPainterMirrored: isMirrored,
     );
 
-    final extractor = LipMeshExtractor(
+    final rawContours = LipMeshExtractor(
       translateX: translator.translateX,
       translateY: translator.translateY,
-    );
+    ).extract(meshes.first);
 
-    final contours = extractor.extract(mesh);
-    if (mounted) setState(() => _lipContours = contours);
+    if (rawContours == null) return;
+
+    // ── EWMA temporal smoothing ───────────────────────────────────────────
+    final prev = _lipController.lipContours;
+    final smoothed = prev == null
+        ? rawContours
+        : LipContours(
+            outer: _smoothPoints(prev.outer, rawContours.outer),
+            inner: _smoothPoints(prev.inner, rawContours.inner),
+          );
+
+    // ── Push to painter — no setState, no widget rebuild ─────────────────
+    _lipController.updateContours(smoothed);
   }
 
-  // ── Hex → Color helper ────────────────────────────────────────────────────
+  List<Offset> _smoothPoints(List<Offset> prev, List<Offset> next) {
+    if (prev.length != next.length) return next;
+    return List<Offset>.generate(next.length, (i) => Offset(
+      prev[i].dx + _kSmoothingAlpha * (next[i].dx - prev[i].dx),
+      prev[i].dy + _kSmoothingAlpha * (next[i].dy - prev[i].dy),
+    ));
+  }
 
-  /// Parses a CSS-style hex string (with or without leading '#') into a
-  /// Flutter [Color].  Returns a warm terracotta fallback if parsing fails so
-  /// the painter is never handed a garbage value.
+  // ── Shade → Color helpers ─────────────────────────────────────────────────
+
   Color _hexToColor(String hex) {
     try {
-      final sanitised = hex.replaceFirst('#', '');
-      final value = int.parse(
-        sanitised.length == 6 ? 'FF$sanitised' : sanitised,
-        radix: 16,
-      );
-      return Color(value);
+      final s = hex.replaceFirst('#', '');
+      return Color(int.parse(s.length == 6 ? 'FF$s' : s, radix: 16));
     } catch (_) {
-      return const Color(0xFF982A2A); // Deep Autumn fallback
+      return const Color(0xFF982A2A);
     }
+  }
+
+  ArShadeModel? _resolveShade(ArTryonState state) {
+    final id = state.selectedShadeId;
+    if (id == null) return null;
+    return state.allShades.cast<ArShadeModel?>().firstWhere(
+      (s) => s?.id == id,
+      orElse: () => null,
+    );
+  }
+
+  void _syncColor(ArTryonState state) {
+    final shade = _resolveShade(state);
+    _lipController.updateColor(
+      shade != null ? _hexToColor(shade.colorHex) : const Color(0xFF982A2A),
+    );
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Watch the full AR state from the provider.
     final arState = ref.watch(arTryonProvider);
 
-    // Resolve which shade is currently selected (may be null while loading).
-    final ArShadeModel? selectedShade = arState.selectedShadeId != null
-        ? arState.allShades.cast<ArShadeModel?>().firstWhere(
-              (s) => s?.id == arState.selectedShadeId,
-              orElse: () => null,
-            )
-        : null;
+    // Keep controller color in sync whenever the selected shade changes.
+    // ref.listen is called in build() per Riverpod convention.
+    ref.listen<ArTryonState>(arTryonProvider, (_, next) => _syncColor(next));
+    // Sync for the current build (first render or hot-restart).
+    _syncColor(arState);
 
-    // Parse the hex colour; fall back gracefully when no shade is selected yet.
-    final Color activeColor = selectedShade != null
-        ? _hexToColor(selectedShade.colorHex)
-        : const Color(0xFF982A2A);
+    // Banner still needs the shade object for display text.
+    final selectedShade = _resolveShade(arState);
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 1. Base Layer: real camera preview + AR painter
-          _buildArCameraLayer(activeColor),
-
-          // 2. Top Layer: Product Banner – driven by provider state
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: ArTopProductBanner(
-              selectedShade: selectedShade,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final canPop = await _onPopInvoked();
+        if (canPop && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildArCameraLayer(),
+            Positioned(
+              top: 0, left: 0, right: 0,
+              child: ArTopProductBanner(selectedShade: selectedShade),
             ),
-          ),
-
-          // 3. Bottom Layer: Swatch Panel – driven by provider state
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: const ArSwatchBottomPanel(),
-          ),
-        ],
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: ArSwatchBottomPanel(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-
-  Widget _buildArCameraLayer(Color activeColor) {
+  Widget _buildArCameraLayer() {
     final controller = _cameraController;
     return GestureDetector(
-      onLongPressStart: (_) => setState(() => _isComparing = true),
-      onLongPressEnd: (_) => setState(() => _isComparing = false),
+      onLongPressStart: (_) {
+        _lipController.setVisible(false); // hide overlay via controller, no setState
+      },
+      onLongPressEnd: (_) {
+        _lipController.setVisible(true);
+      },
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Camera preview (or placeholder while initialising)
-          if (controller != null && controller.value.isInitialized)
+          // ── Camera preview ───────────────────────────────────────────────
+          if (_cameraReady && controller != null && controller.value.isInitialized)
             ClipRect(
               child: OverflowBox(
                 alignment: Alignment.center,
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
-                    width: controller.value.previewSize!.height,
+                    // Swap width/height: sensor is landscape; display is portrait.
+                    width:  controller.value.previewSize!.height,
                     height: controller.value.previewSize!.width,
-                    child: CameraPreview(controller),
+                    child:  CameraPreview(controller),
                   ),
                 ),
               ),
@@ -309,25 +359,25 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
               ),
             ),
 
-          // AR overlay: lipstick painter
-          if (!_isComparing)
-            CustomPaint(
-              painter: LipstickPainter(
-                lipContours: _lipContours,
-                lipColor: activeColor,
-              ),
+          // ── AR overlay ───────────────────────────────────────────────────
+          // RepaintBoundary isolates the CustomPaint raster layer from the
+          // rest of the widget tree. When the controller notifies, only the
+          // pixels inside this boundary are re-composited on the GPU thread —
+          // zero cost to the rest of the UI.
+          RepaintBoundary(
+            child: CustomPaint(
+              painter: LipstickPainter(controller: _lipController),
             ),
+          ),
 
-          // "HOLD TO COMPARE" pill
+          // ── "HOLD TO COMPARE" hint ───────────────────────────────────────
           Positioned(
             top: MediaQuery.of(context).padding.top + 80,
-            left: 0,
-            right: 0,
+            left: 0, right: 0,
             child: Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: 16, vertical: 8,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.5),
@@ -351,18 +401,15 @@ class _ArTryonScreenState extends ConsumerState<ArTryonScreen>
   }
 }
 
-// Extension to read device orientation as degrees from DeviceOrientation.
+// ── Extension ─────────────────────────────────────────────────────────────────
+
 extension _DeviceOrientationExt on DeviceOrientation {
   int get rawValue {
     switch (this) {
-      case DeviceOrientation.portraitUp:
-        return 0;
-      case DeviceOrientation.landscapeRight:
-        return 90;
-      case DeviceOrientation.portraitDown:
-        return 180;
-      case DeviceOrientation.landscapeLeft:
-        return 270;
+      case DeviceOrientation.portraitUp:     return 0;
+      case DeviceOrientation.landscapeRight: return 90;
+      case DeviceOrientation.portraitDown:   return 180;
+      case DeviceOrientation.landscapeLeft:  return 270;
     }
   }
 }

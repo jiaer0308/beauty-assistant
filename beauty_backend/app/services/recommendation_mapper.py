@@ -227,6 +227,7 @@ class RecommendationMapper:
                 cosmetics_by_category[cat_name].append({
                     "id": product.id,
                     "category": cat_name,
+                    "category_id": cat_id,
                     "brand": product.brand.name,
                     "name": product.product_name,
                     "shade": product.shade_name,

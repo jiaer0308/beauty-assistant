@@ -38,11 +38,14 @@ class DashboardData {
   /// [ProductRecommendation] model used by the UI.
   static ProductRecommendation _productFromDashboard(Map<String, dynamic> json) {
     return ProductRecommendation(
+      id: json['id'] as int? ?? 0,
       brand: json['brand'] as String? ?? '',
       name: json['name'] as String? ?? '',
-      shade: '',          // dashboard schema combines name+shade into `name`
-      matchPercentage: 0, // not provided by the dashboard endpoint
+      shade: json['shade'] as String? ?? '',
+      matchPercentage: json['matchPercentage'] as int? ?? 0,
       imageUrl: json['image_url'] as String? ?? '',
+      categoryId: json['category_id'] as int?,
+      hexCode: json['hex_code'] as String?,
     );
   }
 

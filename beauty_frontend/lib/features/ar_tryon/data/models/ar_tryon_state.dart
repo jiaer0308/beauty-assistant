@@ -11,6 +11,7 @@ class ArTryonState {
   final List<ArShadeModel> allShades;
   final bool isBestColorsFilterActive;
   final String? selectedShadeId;
+  final bool isSessionMode;
 
   const ArTryonState({
     this.isLoading = false,
@@ -18,6 +19,7 @@ class ArTryonState {
     this.allShades = const [],
     this.isBestColorsFilterActive = true,
     this.selectedShadeId,
+    this.isSessionMode = false,
   });
 
   /// Returns only shades where [isBestColor] is true when the filter is
@@ -38,6 +40,7 @@ class ArTryonState {
     bool? isBestColorsFilterActive,
     // Use a wrapper to allow explicitly setting selectedShadeId to null.
     Object? selectedShadeId = _sentinel,
+    bool? isSessionMode,
   }) {
     return ArTryonState(
       isLoading: isLoading ?? this.isLoading,
@@ -48,6 +51,7 @@ class ArTryonState {
       selectedShadeId: identical(selectedShadeId, _sentinel)
           ? this.selectedShadeId
           : selectedShadeId as String?,
+      isSessionMode: isSessionMode ?? this.isSessionMode,
     );
   }
 
@@ -55,7 +59,7 @@ class ArTryonState {
   String toString() =>
       'ArTryonState(loading: $isLoading, category: $activeCategory, '
       'shades: ${allShades.length}, filterActive: $isBestColorsFilterActive, '
-      'selected: $selectedShadeId)';
+      'selected: $selectedShadeId, sessionMode: $isSessionMode)';
 }
 
 /// Private sentinel used by [copyWith] to distinguish between "not provided"

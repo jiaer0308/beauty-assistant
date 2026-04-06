@@ -70,6 +70,9 @@ class SeasonResult:
     quiz_influence: float = 0.0
     """0–1 float indicating how much quiz data shifted the final result"""
     
+    session_id: int | None = None
+    """The database ID of the created recommendation session"""
+
     def __post_init__(self):
         """Validate entity after initialization"""
         # Validate confidence

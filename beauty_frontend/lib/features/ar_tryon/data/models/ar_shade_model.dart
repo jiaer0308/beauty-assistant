@@ -12,6 +12,9 @@ class ArShadeModel {
   /// Hex color string including the '#' prefix, e.g. '#B5453A'.
   final String colorHex;
 
+  /// The ID of the parent product this shade belongs to.
+  final int? productId;
+
   /// Whether this shade was identified as a "best color" for the user's
   /// seasonal palette (e.g. Deep Autumn).
   final bool isBestColor;
@@ -22,6 +25,7 @@ class ArShadeModel {
     required this.productName,
     required this.shadeName,
     required this.colorHex,
+    this.productId,
     this.isBestColor = false,
   });
 
@@ -31,6 +35,7 @@ class ArShadeModel {
     String? productName,
     String? shadeName,
     String? colorHex,
+    int? productId,
     bool? isBestColor,
   }) {
     return ArShadeModel(
@@ -39,6 +44,7 @@ class ArShadeModel {
       productName: productName ?? this.productName,
       shadeName: shadeName ?? this.shadeName,
       colorHex: colorHex ?? this.colorHex,
+      productId: productId ?? this.productId,
       isBestColor: isBestColor ?? this.isBestColor,
     );
   }

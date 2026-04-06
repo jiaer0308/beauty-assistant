@@ -15,9 +15,13 @@ from pydantic import BaseModel, Field
 
 class RecommendedProduct(BaseModel):
     """A specific cosmetic product recommendation fetched directly from the DB."""
+    id: int = Field(..., examples=[42], description="Database ID of the cosmetic product")
     brand: str = Field(..., examples=["NARS"], description="Brand name")
-    name: str = Field(..., examples=["Liquid Blush in Orgasm"], description="Combined product and shade name")
+    name: str = Field(..., examples=["Liquid Blush"], description="Product name")
+    shade: str = Field(..., examples=["Orgasm"], description="Shade name")
     image_url: str = Field(..., examples=["https://example.com/image.png"], description="URL of the product image")
+    category_id: int = Field(..., examples=[6], description="Category ID — 6=Lipstick, 7=Lip Gloss, 8=Lip Stain. Used by the client to determine AR compatibility.")
+    hex_code: Optional[str] = Field(None, examples=["#C04040"], description="Hex color code of the shade, if available")
 
 
 class DashboardResult(BaseModel):
@@ -50,7 +54,8 @@ class DashboardResponse(BaseModel):
                 "recommended_products": [
                     {
                         "brand": "NARS",
-                        "name": "Liquid Blush in Orgasm",
+                        "name": "Liquid Blush",
+                        "shade": "Orgasm",
                         "image_url": "https://example.com/image.png"
                     }
                 ]

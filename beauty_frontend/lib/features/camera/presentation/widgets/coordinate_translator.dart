@@ -1,13 +1,30 @@
 import 'dart:io';
 import 'dart:ui';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 
-/// Maps raw [CameraImage] (YUV / BGRA) coordinates from the ML Kit face mesh
-/// output to Canvas (UI) coordinates, accounting for sensor orientation,
-/// device rotation and front-camera mirroring.
+/// Maps raw [CameraImage] coordinates from the ML Kit face mesh output to
+/// Canvas (UI) coordinates, correctly accounting for how the camera preview
+/// is rendered with [BoxFit.cover].
+///
+/// # Why BoxFit.cover matters
+///
+/// The camera preview widget is wrapped in:
+///   `FittedBox(fit: BoxFit.cover, child: SizedBox(w: previewH, h: previewW, …))`
+///
+/// `BoxFit.cover` scales content uniformly using `max(scaleX, scaleY)` so the
+/// viewport is fully filled. The axis with the *smaller* ratio is over-scaled
+/// and clipped/centered. Using different per-axis scales (old behaviour) made
+/// the translated points narrower or taller than their on-screen positions.
+///
+/// The correct mapping is:
+///   coverScale = max(screenW / imageW, screenH / imageH)
+///   xClipOffset = (imageW * coverScale - screenW) / 2   (≥ 0 when X is wider)
+///   yClipOffset = (imageH * coverScale - screenH) / 2   (≥ 0 when Y is taller)
+///
+///   screenX = x * coverScale - xClipOffset   (then mirror if front camera)
+///   screenY = y * coverScale - yClipOffset
 class CoordinateTranslator {
   const CoordinateTranslator({
     required this.imageWidth,
@@ -23,20 +40,44 @@ class CoordinateTranslator {
   final double screenHeight;
   final bool isPainterMirrored;
 
-  /// Translates X coordinate from image space to canvas space.
-  double translateX(double x) {
-    final double scale = screenWidth / imageWidth;
-    if (isPainterMirrored) {
-      return screenWidth - (x * scale);
-    }
-    return x * scale;
+  // ── BoxFit.cover helpers ─────────────────────────────────────────────────
+
+  /// The uniform scale applied by BoxFit.cover: whichever axis needs the
+  /// larger scale to fill the screen wins (the other axis is over-scaled and
+  /// clipped).
+  double get _coverScale {
+    final scaleX = screenWidth  / imageWidth;
+    final scaleY = screenHeight / imageHeight;
+    return scaleX > scaleY ? scaleX : scaleY;
   }
 
-  /// Translates Y coordinate from image space to canvas space.
-  double translateY(double y) {
-    final double scale = screenHeight / imageHeight;
-    return y * scale;
+  /// Horizontal clip offset: how many logical px are cropped on each side
+  /// when the image is wider than the screen after scaling.
+  double get _xClipOffset =>
+      ((imageWidth  * _coverScale) - screenWidth)  / 2;
+
+  /// Vertical clip offset: how many logical px are cropped on top/bottom
+  /// when the image is taller than the screen after scaling.
+  double get _yClipOffset =>
+      ((imageHeight * _coverScale) - screenHeight) / 2;
+
+  // ── Public API ───────────────────────────────────────────────────────────
+
+  /// Translates image-space X to canvas X, accounting for cover-scale and
+  /// front-camera horizontal mirroring.
+  double translateX(double x) {
+    final screenX = x * _coverScale - _xClipOffset;
+    if (isPainterMirrored) {
+      // Mirror around the screen centre so the overlay matches the
+      // horizontally-flipped camera preview.
+      return screenWidth - screenX;
+    }
+    return screenX;
   }
+
+  /// Translates image-space Y to canvas Y, accounting for cover-scale and
+  /// vertical clipping.
+  double translateY(double y) => y * _coverScale - _yClipOffset;
 }
 
 /// Converts a [CameraImage] from the camera plugin stream into an

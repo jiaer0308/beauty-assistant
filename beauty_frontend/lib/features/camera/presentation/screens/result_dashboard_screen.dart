@@ -156,11 +156,17 @@ class ResultDashboardScreen extends ConsumerWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16.0,
                     mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.75, // Adjust based on card design
+                    childAspectRatio: 0.55, // Adjusted to allow more height for text
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    return ProductMatchCard(product: products[index]);
+                    return ProductMatchCard(
+                      product: products[index],
+                      onTap: () => context.push('/ar-tryon', extra: {
+                        'dashboardProducts': products,
+                        'selectedId': products[index].id,
+                      }),
+                    );
                   },
                 ),
               ),
@@ -188,13 +194,13 @@ class ResultDashboardScreen extends ConsumerWidget {
       bottomNavigationBar: StickyArFooter(
         onPressed: () {
           if (authState.status == AuthStatus.authenticated) {
-            context.push('/ar-tryon');
+            context.push('/ar-tryon', extra: {'sessionId': data.sessionId});
           } else {
             AuthBottomSheet.show(
               context, 
               discoveredSeason: displayName,
               onSuccess: () {
-                context.push('/ar-tryon');
+                context.push('/ar-tryon', extra: {'sessionId': data.sessionId});
               },
             );
           }

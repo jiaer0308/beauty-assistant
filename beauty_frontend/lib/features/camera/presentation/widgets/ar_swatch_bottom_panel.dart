@@ -3,8 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../ar_tryon/presentation/providers/ar_tryon_provider.dart';
 
-class ArSwatchBottomPanel extends ConsumerWidget {
+class ArSwatchBottomPanel extends ConsumerStatefulWidget {
   const ArSwatchBottomPanel({super.key});
+
+  @override
+  ConsumerState<ArSwatchBottomPanel> createState() => _ArSwatchBottomPanelState();
+}
+
+class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   /// Parses a CSS-style hex string (with or without leading '#') into a
   /// Flutter [Color]. Returns a warm terracotta fallback if parsing fails.
@@ -22,39 +41,78 @@ class ArSwatchBottomPanel extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(arTryonProvider);
     final notifier = ref.read(arTryonProvider.notifier);
     // Cache to avoid calling the getter (which internally .toList()s) twice.
     final filteredShades = state.filteredShades;
+
+    ref.listen(arTryonProvider, (previous, next) {
+      if (previous == null) return;
+      
+      // Animate scroll when selection changes or toggling collection mode
+      if (previous.isBestColorsFilterActive != next.isBestColorsFilterActive ||
+          previous.selectedShadeId != next.selectedShadeId || 
+          previous.allShades.length != next.allShades.length) {
+          
+        final index = next.filteredShades.indexWhere((s) => s.id == next.selectedShadeId);
+        if (index != -1 && _scrollController.hasClients) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!_scrollController.hasClients) return;
+            
+            final screenWidth = MediaQuery.of(context).size.width;
+            const swatchWidth = 64.0;
+            // Target offset centers the swatch in the screen width
+            double targetOffset = (index * swatchWidth) - (screenWidth / 2) + (swatchWidth / 2);
+            
+            // Clamp to scroll extent bounds
+            final maxScroll = _scrollController.position.maxScrollExtent;
+            final minScroll = _scrollController.position.minScrollExtent;
+            if (targetOffset > maxScroll) targetOffset = maxScroll;
+            if (targetOffset < minScroll) targetOffset = minScroll;
+            
+            _scrollController.animateTo(
+              targetOffset,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+            );
+          });
+        }
+      }
+    });
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Filter Pill
-        Center(
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16.0),
-            decoration: BoxDecoration(
-              color: GlowTheme.pearlWhite.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(24.0),
-              border: Border.all(color: GlowTheme.oatmeal, width: 1.0),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildFilterButton('My Best Colors', true, state.isBestColorsFilterActive, notifier),
-                _buildFilterButton('Explore Collection', false, state.isBestColorsFilterActive, notifier),
-              ],
+        if (!state.isSessionMode)
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16.0),
+              decoration: BoxDecoration(
+                color: GlowTheme.pearlWhite.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(24.0),
+                border: Border.all(color: GlowTheme.oatmeal, width: 1.0),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildFilterButton('My Best Colors', true, state.isBestColorsFilterActive, notifier),
+                    _buildFilterButton('Explore Collection', false, state.isBestColorsFilterActive, notifier),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
 
         // Swatches horizontally scrolling row
         SizedBox(
           height: 64,
           child: ListView.builder(
+            controller: _scrollController,
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.zero,
             itemCount: filteredShades.length,

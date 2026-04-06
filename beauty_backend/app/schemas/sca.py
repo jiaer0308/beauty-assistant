@@ -91,7 +91,9 @@ class ColorPalette(BaseModel):
 
 class CosmeticProduct(BaseModel):
     """A specific cosmetic product recommendation."""
+    id: int = Field(default=0, examples=[42], description="Database ID of the cosmetic product")
     category: str = Field(..., examples=["Lipstick"], description="Product category")
+    category_id: int | None = Field(default=None, examples=[6], description="Category ID used for AR capabilities")
     brand: str = Field(..., examples=["MAC"], description="Brand name")
     name: str = Field(..., examples=["Cherish"], description="Product name")
     shade: str = Field(..., examples=["Cherish"], description="Shade name")
@@ -160,6 +162,10 @@ class SCAResponse(BaseModel):
         ge=0.0,
         le=1.0,
         description="0–1 float indicating how much the quiz shifted the final season result",
+    )
+    session_id: int | None = Field(
+        default=None, 
+        description="The database ID of the created recommendation session"
     )
     analyzed_at: datetime = Field(default_factory=datetime.now)
 

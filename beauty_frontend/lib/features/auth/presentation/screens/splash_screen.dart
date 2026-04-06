@@ -28,32 +28,32 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       _errorMessage = null;
     });
 
-    print('SplashScreen: Initializing app...');
+    debugPrint('SplashScreen: Initializing app...');
     final authNotifier = ref.read(authProvider.notifier);
     
     try {
-      print('SplashScreen: Calling authNotifier.init()...');
+      debugPrint('SplashScreen: Calling authNotifier.init()...');
       await authNotifier.init().timeout(const Duration(seconds: 15));
-      print('SplashScreen: authNotifier.init() completed.');
+      debugPrint('SplashScreen: authNotifier.init() completed.');
     } catch (e) {
-      print('SplashScreen: Error during authNotifier.init(): $e');
+      debugPrint('SplashScreen: Error during authNotifier.init(): $e');
       // If it times out or fails, we might still want to try guest login or show error
     }
     
     if (!mounted) return;
 
     final authState = ref.read(authProvider);
-    print('SplashScreen: Current AuthStatus: ${authState.status}');
+    debugPrint('SplashScreen: Current AuthStatus: ${authState.status}');
     
     if (authState.status == AuthStatus.authenticated) {
       context.go('/dashboard');
     } else if (authState.status == AuthStatus.guest) {
       context.go('/welcome');
     } else {
-      print('SplashScreen: Attempting loginAsGuest()...');
+      debugPrint('SplashScreen: Attempting loginAsGuest()...');
       try {
         await authNotifier.loginAsGuest().timeout(const Duration(seconds: 15));
-        print('SplashScreen: loginAsGuest() completed.');
+        debugPrint('SplashScreen: loginAsGuest() completed.');
         
         if (mounted) {
           final newState = ref.read(authProvider);
@@ -67,7 +67,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           context.go('/welcome');
         }
       } catch (e) {
-        print('SplashScreen: Error during loginAsGuest(): $e');
+        debugPrint('SplashScreen: Error during loginAsGuest(): $e');
         if (mounted) {
           setState(() {
             _hasError = true;
@@ -82,12 +82,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     // Listen for state changes and navigate automatically
     ref.listen<AuthState>(authProvider, (previous, next) {
-      print('SplashScreen: State change detected: ${next.status}');
+      debugPrint('SplashScreen: State change detected: ${next.status}');
       if (next.status == AuthStatus.authenticated) {
-        print('SplashScreen: Navigating to /dashboard');
+        debugPrint('SplashScreen: Navigating to /dashboard');
         context.go('/dashboard');
       } else if (next.status == AuthStatus.guest) {
-        print('SplashScreen: Navigating to /welcome');
+        debugPrint('SplashScreen: Navigating to /welcome');
         context.go('/welcome');
       }
     });

@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../../core/constants/season_constants.dart';
-import '../../../camera/presentation/providers/color_analysis_provider.dart';
 import '../../../camera/data/models/color_analysis_response.dart';
+import '../../../camera/presentation/widgets/product_match_card.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -277,7 +277,6 @@ class CuratedGridSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final products = analysisData?.recommendedProducts ?? [];
-    final itemCount = products.isNotEmpty ? products.length : 4;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -296,104 +295,35 @@ class CuratedGridSection extends StatelessWidget {
           color: GlowTheme.oatmeal,
         ),
         const SizedBox(height: 24),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.7,
+        if (products.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 40.0),
+              child: Text('No recommendations available yet.'),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.52,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              return ProductMatchCard(
+                product: products[index],
+                onTap: () => context.push('/ar-tryon', extra: {
+                  'dashboardProducts': products,
+                  'selectedId': products[index].id,
+                }),
+              );
+            },
           ),
-          itemCount: itemCount,
-          itemBuilder: (context, index) {
-            if (products.isNotEmpty) {
-               return ProductMatchCard(product: products[index]);
-            }
-            return const ProductMatchCard();
-          },
-        ),
       ],
-    );
-  }
-}
-
-class ProductMatchCard extends StatelessWidget {
-  final ProductRecommendation? product;
-  const ProductMatchCard({super.key, this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    final brand = product?.brand ?? 'NARS';
-    final name = product?.name ?? 'Liquid Blush';
-    final imageUrl = product?.imageUrl;
-    return GestureDetector(
-      onTap: () => context.push('/ar-tryon', extra: product),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: GlowTheme.oatmeal, width: 1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                color: GlowTheme.pearlWhite,
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.network(imageUrl, fit: BoxFit.cover)
-                    : Center(
-                        child: Icon(Icons.image_outlined, color: GlowTheme.oatmeal.withValues(alpha: 0.5), size: 48),
-                      ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    brand,
-                    style: TextStyle(
-                      fontFamily: 'Plus Jakarta Sans',
-                      color: GlowTheme.deepTaupe,
-                      fontSize: 10,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: GoogleFonts.playfairDisplay(
-                            color: GlowTheme.deepTaupe,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.auto_awesome,
-                        color: GlowTheme.champagneGold,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

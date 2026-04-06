@@ -1,5 +1,6 @@
 class ColorAnalysisResponse {
   final bool success;
+  final int? sessionId;
   final AnalysisResult? result;
   final Map<String, dynamic>? metrics;
   final List<ColorInfo> bestColors;
@@ -9,6 +10,7 @@ class ColorAnalysisResponse {
 
   ColorAnalysisResponse({
     required this.success,
+    this.sessionId,
     this.result,
     this.metrics,
     this.bestColors = const [],
@@ -24,6 +26,7 @@ class ColorAnalysisResponse {
 
     return ColorAnalysisResponse(
       success: json['success'] ?? false,
+      sessionId: json['session_id'] as int?,
       result: json['result'] != null ? AnalysisResult.fromJson(json['result']) : null,
       metrics: json['metrics'] as Map<String, dynamic>?,
       bestColors: (colorPalette['best'] as List<dynamic>?)
@@ -83,27 +86,36 @@ class ColorInfo {
 }
 
 class ProductRecommendation {
+  final int id;
   final String brand;
   final String name;
   final String shade;
   final int matchPercentage;
   final String imageUrl;
+  final int? categoryId;
+  final String? hexCode;
 
   ProductRecommendation({
+    this.id = 0,
     required this.brand,
     required this.name,
     required this.shade,
     required this.matchPercentage,
     required this.imageUrl,
+    this.categoryId,
+    this.hexCode,
   });
 
   factory ProductRecommendation.fromJson(Map<String, dynamic> json) {
     return ProductRecommendation(
+      id: json['id'] ?? 0,
       brand: json['brand'] ?? '',
       name: json['name'] ?? '',
       shade: json['shade'] ?? '',
       matchPercentage: json['matchPercentage'] ?? 0,
       imageUrl: json['image_url'] ?? '',
+      categoryId: json['category_id'] as int?,
+      hexCode: json['hex_code'] as String?,
     );
   }
 }

@@ -85,9 +85,13 @@ def get_dashboard(
         
         recommended_products.append(
             RecommendedProduct(
+                id=product.id,
                 brand=brand.name,
-                name=combined_name,
-                image_url=image_url
+                name=product.product_name,
+                shade=product.shade_name,
+                image_url=image_url,
+                category_id=product.category_id,
+                hex_code=product.hex_code if product.hex_code else None,
             )
         )
 

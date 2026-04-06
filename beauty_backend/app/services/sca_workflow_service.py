@@ -390,9 +390,10 @@ class SCAWorkflowService:
         ]
 
         # Save the analysis session to history
-        HistoryService.save_session(
+        saved_session = HistoryService.save_session(
             db, user_id, "sca_scan", season_id, cosmetic_ids, None
         )
+        result.session_id = saved_session.id
 
         # Update the User's current season in the database
         db_user = db.query(User).filter(User.id == user_id).first()

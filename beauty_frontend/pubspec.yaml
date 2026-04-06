@@ -43,9 +43,15 @@ dependencies:
   camerawesome: ^2.5.0
   image_picker: ^1.2.1
   flutter_secure_storage: ^9.2.2
-  camera: ^0.11.0+2
+  camera: ^0.11.2+1
   google_mlkit_face_mesh_detection: ^0.2.0
   google_mlkit_commons: ^0.7.0
+
+dependency_overrides:
+  # camera 0.11.x ships camera_android_camerax which has a known fatal crash
+  # when navigating away (ObserverProxyApi$ObserverImpl). Pin to 0.10.x (Camera2
+  # backend) until the upstream bug is resolved.
+  camera_android: 0.10.8+14
 
 dev_dependencies:
   flutter_test:

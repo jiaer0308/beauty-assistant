@@ -215,6 +215,7 @@ async def analyze_image(
         ),
         recommendations=recommendations,
         quiz_influence=result.quiz_influence,
+        session_id=result.session_id,
         analyzed_at=result.timestamp,
     )
 

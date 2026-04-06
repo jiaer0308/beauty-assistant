@@ -70,8 +70,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ar-tryon',
         builder: (context, state) {
-          final product = state.extra as ProductRecommendation?;
-          return ArTryonScreen(product: product);
+          final extra = state.extra;
+
+          if (extra is Map<String, dynamic> || extra is Map) {
+            final map = extra as Map;
+            
+            // ── SCA Entry: extra = {'sessionId': int}
+            if (map.containsKey('sessionId')) {
+              return ArTryonScreen(sessionId: map['sessionId'] as int);
+            }
+            
+            // ── Dashboard Entry: extra = {'dashboardProducts': List<ProductRecommendation>, 'selectedId': int}
+            if (map.containsKey('dashboardProducts')) {
+              final productsRaw = map['dashboardProducts'];
+              final selectedId = map['selectedId'] as int?;
+              
+              if (productsRaw is List) {
+                // Safely cast the list elements to the expected type
+                final products = productsRaw.cast<ProductRecommendation>();
+                
+                return ArTryonScreen(
+                  dashboardProducts: products,
+                  selectedDashboardId: selectedId,
+                );
+              }
+            }
+          }
+
+          // ── Standalone / direct navigation (no extra)
+          return const ArTryonScreen();
         },
       ),
     ],
