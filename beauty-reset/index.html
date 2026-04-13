@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        // Read token from query string and redirect to app deep link
+        const token = new URLSearchParams(window.location.search).get('token');
+        window.location.href = 'beautyassistant://reset-password?token=' + token;
+    </script>
+</head>
+
+<body>
+    <p>Opening Beauty Assistant app...</p>
+</body>
+
+</html>
