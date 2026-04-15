@@ -41,6 +41,16 @@ class CosmeticSessionItem(BaseModel):
     id: int = Field(..., description="Cosmetic product ID", examples=[42])
     product_name: str = Field(..., description="Product name", examples=["Liquid Blush"])
     shade_name: str = Field(..., description="Shade name", examples=["Orgasm"])
+    brand_name: Optional[str] = Field(
+        default=None,
+        description="Brand name",
+        examples=["NARS"],
+    )
+    category_id: Optional[int] = Field(
+        default=None,
+        description="Category ID",
+        examples=[1],
+    )
     hex_code: Optional[str] = Field(
         default=None,
         description="Hex colour code of the shade (e.g. '#C8857A')",

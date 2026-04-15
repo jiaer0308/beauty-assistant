@@ -3,10 +3,17 @@
 User entity model for the Beauty Assistant database.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, func
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, func, ForeignKey, Table
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
+
+user_favorite_cosmetics = Table(
+    'user_favorite_cosmetics', Base.metadata,
+    Column('user_id', Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True),
+    Column('cosmetic_id', Integer, ForeignKey('cosmetic_products.id', ondelete='CASCADE'), primary_key=True),
+    Column('created_at', DateTime(timezone=True), server_default=func.now())
+)
 
 
 class User(Base):
@@ -38,6 +45,7 @@ class User(Base):
 
     # Relationships
     sessions = relationship("RecommendationSession", back_populates="user", cascade="all, delete-orphan")
+    favorite_cosmetics = relationship("CosmeticProduct", secondary=user_favorite_cosmetics, backref="favorited_by")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', is_guest={self.is_guest})>"

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/reset_password_provider.dart';
 import '../../models/auth_state.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -42,39 +43,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     
     if (!mounted) return;
 
+    // Deep-link safety net (cold start): if main.dart received a reset-password
+    // deep link before the router was ready, the token is stored here.
+    final pendingToken = ref.read(pendingResetTokenProvider);
+    if (pendingToken != null && pendingToken.isNotEmpty) {
+      ref.read(pendingResetTokenProvider.notifier).state = null;
+      debugPrint('SplashScreen: pending reset token -> /reset-password');
+      context.go('/reset-password?token=$pendingToken');
+      return;
+    }
+
     final authState = ref.read(authProvider);
     debugPrint('SplashScreen: Current AuthStatus: ${authState.status}');
-    
+
     if (authState.status == AuthStatus.authenticated) {
       context.go('/dashboard');
-    } else if (authState.status == AuthStatus.guest) {
-      context.go('/welcome');
     } else {
-      debugPrint('SplashScreen: Attempting loginAsGuest()...');
-      try {
-        await authNotifier.loginAsGuest().timeout(const Duration(seconds: 15));
-        debugPrint('SplashScreen: loginAsGuest() completed.');
-        
-        if (mounted) {
-          final newState = ref.read(authProvider);
-          if (newState.status == AuthStatus.error) {
-            setState(() {
-              _hasError = true;
-              _errorMessage = newState.errorMessage ?? 'Connection failed';
-            });
-            return;
-          }
-          context.go('/welcome');
-        }
-      } catch (e) {
-        debugPrint('SplashScreen: Error during loginAsGuest(): $e');
-        if (mounted) {
-          setState(() {
-            _hasError = true;
-            _errorMessage = 'Could not connect to server. Please check your internet.';
-          });
-        }
-      }
+      context.go('/welcome');
     }
   }
 
@@ -86,7 +71,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       if (next.status == AuthStatus.authenticated) {
         debugPrint('SplashScreen: Navigating to /dashboard');
         context.go('/dashboard');
-      } else if (next.status == AuthStatus.guest) {
+      } else if (next.status == AuthStatus.guest || next.status == AuthStatus.unauthenticated) {
         debugPrint('SplashScreen: Navigating to /welcome');
         context.go('/welcome');
       }

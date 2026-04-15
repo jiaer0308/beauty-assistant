@@ -15,6 +15,8 @@ Step 3: BiSeNet (Segmentation on aligned face)
 Step 4: Color Extraction & Analysis (on aligned image + masks)
 """
 
+import asyncio
+import functools
 import time
 import cv2
 import numpy as np
@@ -22,7 +24,7 @@ from PIL import Image
 from io import BytesIO
 from datetime import datetime
 from typing import Dict, Optional, Tuple, List
-import logging  
+import logging
 from sqlalchemy.orm import Session
 
 # Internal imports
@@ -138,24 +140,53 @@ class SCAWorkflowService:
         quiz_data: Optional[QuizData] = None,
     ) -> SeasonResult:
         """
-        Execute complete SCA pipeline on uploaded image.
+        Execute the complete SCA pipeline without blocking the async event loop.
+
+        All CPU-bound ML work (OpenCV, ONNX, K-Means) is dispatched to the
+        default thread-pool executor via ``run_in_executor``.  The event loop
+        therefore remains free to serve other requests during the ~1–5 s
+        inference window.
+
+        Args:
+            image_bytes: Raw image bytes (JPEG/PNG)
+            db:          Database session (passed through to the sync worker)
+            user_id:     ID of the requesting user
+            quiz_data:   Optional quiz answers for score fusion
+
+        Returns:
+            SeasonResult entity with season, confidence, colors, metrics,
+            recommendations, and quiz_influence
+
+        Raises:
+            ValidationError: If lighting is too poor or no face detected
+        """
+        loop = asyncio.get_event_loop()
+        sync_fn = functools.partial(
+            self._analyze_sync,
+            image_bytes=image_bytes,
+            db=db,
+            user_id=user_id,
+            quiz_data=quiz_data,
+        )
+        return await loop.run_in_executor(None, sync_fn)
+
+    def _analyze_sync(
+        self,
+        image_bytes: bytes,
+        db: Session,
+        user_id: int,
+        quiz_data: Optional[QuizData] = None,
+    ) -> SeasonResult:
+        """
+        Synchronous ML pipeline — do NOT call directly from async code;
+        use :meth:`analyze` which offloads this via ``run_in_executor``.
 
         Pipeline:
         Phase 0: Validation
         Phase 1: Hybrid Vision (Alignment + Segmentation + Refinement)
         Phase 2: Color Engine (Extraction + LAB conversion)
         Phase 3: Classification (Decision tree)
-        Phase 4: Quiz Fusion + Recommendation Mapping  [NEW]
-
-        Args:
-            image_bytes: Raw image bytes (JPEG/PNG)
-            db:          Database session
-            user_id:     ID of the user performing analysis
-            quiz_data:   Optional user quiz answers for score fusion
-
-        Returns:
-            SeasonResult entity with season, confidence, colors, metrics,
-            recommendations, and quiz_influence
+        Phase 4: Quiz Fusion + Recommendation Mapping
 
         Raises:
             ValidationError: If lighting is too poor or no face detected
@@ -369,18 +400,6 @@ class SCAWorkflowService:
             "bright_winter": 12,
         }
 
-#         bright_spring
-# true_spring
-# light_spring
-# light_summer
-# true_summer
-# soft_summer
-# soft_autumn
-# true_autumn
-# dark_autumn
-# dark_winter
-# true_winter
-# bright_winter
         season_id = season_id_map.get(result.season.value)
 
         # Extract cosmetic_ids from the analysis result (if they exist)

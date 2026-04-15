@@ -12,6 +12,7 @@ from app.api.v1.analysis import router as sca_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.cosmetics import router as cosmetics_router
 from app.api.v1.dashboard import router as dashboard_router
+from app.api.v1.favorites import router as favorites_router
 from app.api.v1.history import router as history_router
 
 api_router = APIRouter()
@@ -30,4 +31,8 @@ api_router.include_router(history_router, prefix="/history", tags=["history"])
 
 # Cosmetics knowledge-base endpoints live at /api/v1/cosmetics/*
 api_router.include_router(cosmetics_router, prefix="/cosmetics", tags=["cosmetics"])
+
+# Favorites endpoints live at /api/v1/favorites/*
+api_router.include_router(favorites_router, prefix="/favorites", tags=["favorites"])
+
 

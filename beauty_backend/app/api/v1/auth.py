@@ -109,27 +109,30 @@ def login_user(credentials: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRe
 @router.post(
     "/forgot-password",
     status_code=status.HTTP_200_OK,
-    summary="Request a password reset token",
-    description="Generates a password reset token for a registered user. In a real app, this would send an email."
+    summary="Request a password reset email",
+    description=(
+        "Sends a password reset link to the supplied email address. "
+        "Always returns 200 to prevent user-enumeration attacks."
+    ),
 )
 def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
     """
     POST /api/v1/auth/forgot-password
-    
+
+    Generates a one-time reset token that expires in 1 hour and emails a
+    reset link to the user. The response is intentionally generic so an
+    attacker cannot tell whether a given email is registered.
+
     Args:
-        request (ForgotPasswordRequest): Contains the user's email
-        
+        request (ForgotPasswordRequest): Contains the user's email.
+
     Returns:
-        dict: A dictionary containing the reset token (for testing purposes)
+        dict: A generic success message.
     """
-    token = AuthService.forgot_password(db, email=request.email)
-    
-    # Normally we would just return {"message": "If the email exists, a reset link has been sent"}
-    # But for testing without an email service, we return the token directly.
-    return {
-        "message": "Password reset token generated", 
-        "reset_token": token
-    }
+    AuthService.forgot_password(db, email=request.email)
+
+    # Always return the same message — never reveal whether the email exists.
+    return {"message": "If that email is registered, a password reset link has been sent."}
 
 
 @router.post(

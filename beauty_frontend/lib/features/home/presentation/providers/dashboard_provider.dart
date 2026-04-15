@@ -42,7 +42,8 @@ class DashboardNotifier extends AsyncNotifier<DashboardData?> {
 
   /// Call this to manually trigger a refresh (e.g. after a new scan).
   Future<void> refresh() async {
-    state = const AsyncLoading();
+    // Preserve current state while loading to avoid a full-screen blank out
+    state = const AsyncLoading<DashboardData?>().copyWithPrevious(state);
     state = await AsyncValue.guard(_fetch);
   }
 }

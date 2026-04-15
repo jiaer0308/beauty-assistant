@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../ar_tryon/presentation/providers/ar_tryon_provider.dart';
-
 class ArSwatchBottomPanel extends ConsumerStatefulWidget {
-  const ArSwatchBottomPanel({super.key});
+  final VoidCallback? onTakePicture;
+
+  const ArSwatchBottomPanel({super.key, this.onTakePicture});
 
   @override
   ConsumerState<ArSwatchBottomPanel> createState() => _ArSwatchBottomPanelState();
 }
-
 class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
   late final ScrollController _scrollController;
-
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
   }
-
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
-
   /// Parses a CSS-style hex string (with or without leading '#') into a
   /// Flutter [Color]. Returns a warm terracotta fallback if parsing fails.
   Color _hexToColor(String hex) {
@@ -39,14 +37,12 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
       return const Color(0xFF982A2A); // Deep Autumn fallback
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(arTryonProvider);
     final notifier = ref.read(arTryonProvider.notifier);
     // Cache to avoid calling the getter (which internally .toList()s) twice.
     final filteredShades = state.filteredShades;
-
     ref.listen(arTryonProvider, (previous, next) {
       if (previous == null) return;
       
@@ -80,7 +76,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
         }
       }
     });
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -107,7 +102,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
               ),
             ),
           ),
-
         // Swatches horizontally scrolling row
         SizedBox(
           height: 64,
@@ -120,7 +114,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
               final shade = filteredShades[index];
               final color = _hexToColor(shade.colorHex);
               final isSelected = shade.id == state.selectedShadeId;
-
               return GestureDetector(
                 onTap: () => notifier.selectShade(shade.id),
                 child: Container(
@@ -146,13 +139,12 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
             },
           ),
         ),
-
-        // Sephora Navigation Bar
-        Container(
+        // Navigation Bar
+Container(
           color: GlowTheme.deepTaupe,
           padding: EdgeInsets.only(
-            left: 24.0,
-            right: 24.0,
+            left: 16.0, // 💡 如果改为内部居中，建议把这里的左右 padding 改小一点（比如 16），留给 Expanded 更多空间来居中
+            right: 16.0,
             top: 16.0,
             bottom: MediaQuery.of(context).padding.bottom + 16.0,
           ),
@@ -161,68 +153,87 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Left: Category
-              GestureDetector(
-                onTap: () {
-                  _showCategorySheet(context, state.activeCategory, notifier);
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      state.activeCategory.toUpperCase(),
-                      style: const TextStyle(
-                        color: GlowTheme.pearlWhite,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                        letterSpacing: 1.2,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center, // ✅ 改为居中：在快门左侧的空间内水平居中
+                  child: GestureDetector(
+                    onTap: () {
+                      // _showCategorySheet(context, state.activeCategory, notifier);
+                    },
+                    child: Container(
+                      color: Colors.transparent, // 增加透明背景扩大点击热区
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // 加一点水平 padding 更好点
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min, // 紧凑排列文字和图标
+                        children: [
+                          Text(
+                            'LIP', // state.activeCategory.toUpperCase()
+                            style: const TextStyle(
+                              color: GlowTheme.pearlWhite,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.keyboard_arrow_up,
+                            color: GlowTheme.pearlWhite,
+                            size: 20,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_up,
-                      color: GlowTheme.pearlWhite,
-                      size: 20,
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
               // Center: Camera Shutter
               GestureDetector(
                 onTap: () {
-                  // Take photo
+                  widget.onTakePicture?.call(); 
                 },
                 child: Container(
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: GlowTheme.pearlWhite, width: 3),
+                    border: Border.all(color: GlowTheme.pearlWhite, width: 4),
                   ),
                   child: Center(
                     child: Container(
-                      width: 44,
-                      height: 44,
+                      width: 44.8,
+                      height: 44.8,
                       decoration: const BoxDecoration(
-                        color: GlowTheme.pearlWhite,
                         shape: BoxShape.circle,
+                        color: GlowTheme.champagneGold, 
                       ),
                     ),
                   ),
                 ),
               ),
 
-              // Right: MY LOOKS
-              GestureDetector(
-                onTap: () {
-                  // View saved looks
-                },
-                child: const Text(
-                  'MY LOOKS',
-                  style: TextStyle(
-                    color: GlowTheme.pearlWhite,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    letterSpacing: 1.2,
+              // Right: COLLECTIONS
+              Expanded(
+                child: Align(
+                  alignment: Alignment.center, // ✅ 改为居中：在快门右侧的空间内水平居中
+                  child: GestureDetector(
+                    onTap: () {
+                      context.push('/favorites');
+                    },
+                    child: Container(
+                      color: Colors.transparent, // 扩大点击热区
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: const Text(
+                        'LOOKS',
+                        style: TextStyle(
+                          color: GlowTheme.pearlWhite,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -232,7 +243,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
       ],
     );
   }
-
   Widget _buildFilterButton(String text, bool isBestColors, bool currentActive, ArTryonNotifier notifier) {
     final isActive = currentActive == isBestColors;
     return GestureDetector(
@@ -258,7 +268,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
       ),
     );
   }
-
   void _showCategorySheet(BuildContext context, String activeCategory, ArTryonNotifier notifier) {
     showModalBottomSheet(
       context: context,
@@ -274,7 +283,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
           'Remove Makeup': 'NONE',
         };
         final categories = categoryMap.keys.toList();
-
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -283,7 +291,6 @@ class _ArSwatchBottomPanelState extends ConsumerState<ArSwatchBottomPanel> {
               children: categories.map((uiCategory) {
                 final mappedValue = categoryMap[uiCategory]!;
                 final isActive = activeCategory == mappedValue;
-
                 return ListTile(
                   onTap: () {
                     notifier.changeCategory(mappedValue);

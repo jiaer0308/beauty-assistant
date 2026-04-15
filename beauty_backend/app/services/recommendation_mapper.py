@@ -13,9 +13,11 @@ Design notes
 """
 
 import logging
+from enum import IntEnum
 from typing import Any, Dict
 
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import func
 
 from app.domain.entities.knowledge_base import (
     Season,
@@ -29,7 +31,9 @@ from app.domain.entities.knowledge_base import (
 logger = logging.getLogger(__name__)
 
 
-class CategoryID:
+class CategoryID(IntEnum):
+    """Maps cosmetic category names to their primary-key IDs in the ``categories`` table."""
+
     CONCEALER = 1
     LIQUID_FOUNDATION = 2
     POWDER = 3
@@ -119,22 +123,13 @@ class RecommendationMapper:
             )
         )
 
-        # Apply Quiz Filters
-        # if quiz_data:
-        #     # Coverage Filtering: If Sheer/Light, exclude heavy 'Foundation' category
-        #     if quiz_data.get("foundation_coverage") == "Sheer/Light":
-        #         cosmetics_query = cosmetics_query.filter(Category.name != "Foundation")
-            
-        #     # Skin Type Filtering: If Oily, exclude categories containing 'Cream'
-        #     if quiz_data.get("skin_type") == "Oily":
-        #         cosmetics_query = cosmetics_query.filter(~Category.name.like("%Cream%"))
-
-        # Apply Quiz Filters
+        # Apply quiz-based filters
         if quiz_data:
-            excluded_category_ids = set()
-            priority_category_ids = set() # 🌟 新增：用于记录需要 Boost / 强制触发的类别
+            excluded_category_ids: set = set()
+            # Tracks categories that should be visually boosted (sorted first) in the response.
+            priority_category_ids: set = set()
 
-            # 1. Skin Type (肤质)
+            # 1. Skin Type
             skin_type = quiz_data.get("skin_type")
             if skin_type == "Oily":
                 excluded_category_ids.update([CategoryID.CREAM, CategoryID.BB_CC_CREAM])
@@ -147,37 +142,37 @@ class RecommendationMapper:
             elif skin_type == "Sensitive":
                 priority_category_ids.update([CategoryID.MINERAL, CategoryID.BB_CC_CREAM])
 
-            # 2. Foundation Coverage (遮瑕度：将"只保留"逻辑转化为"隐式排除"底妆竞品)
+            # 2. Foundation Coverage
             coverage = quiz_data.get("foundation_coverage")
             if coverage == "Sheer / Light":
-                # 排除厚重底妆
+                # Exclude heavy base products
                 excluded_category_ids.update([CategoryID.CREAM, CategoryID.LIQUID_FOUNDATION])
             elif coverage == "Medium":
-                # 排除极轻薄和极厚重底妆
+                # Exclude both ultra-light and ultra-heavy base products
                 excluded_category_ids.update([CategoryID.POWDER, CategoryID.MINERAL, CategoryID.CREAM])
             elif coverage == "Full":
-                # 排除轻薄底妆，强制触发高遮瑕
+                # Exclude light-coverage products; force full-coverage options
                 excluded_category_ids.update([CategoryID.BB_CC_CREAM, CategoryID.POWDER, CategoryID.MINERAL, CategoryID.FOUNDATION])
                 priority_category_ids.update([CategoryID.CREAM, CategoryID.LIQUID_FOUNDATION, CategoryID.CONCEALER])
 
-            # 3. Makeup Finish (妆效)
+            # 3. Makeup Finish
             finish = quiz_data.get("makeup_finish")
             if finish == "Matte / Velvet":
-                excluded_category_ids.update([CategoryID.HIGHLIGHTER, CategoryID.LIP_GLOSS]) 
+                excluded_category_ids.update([CategoryID.HIGHLIGHTER, CategoryID.LIP_GLOSS])
                 priority_category_ids.add(CategoryID.POWDER)
             elif finish == "Dewy / Glowy":
-                excluded_category_ids.add(CategoryID.POWDER) 
+                excluded_category_ids.add(CategoryID.POWDER)
                 priority_category_ids.update([CategoryID.HIGHLIGHTER, CategoryID.BB_CC_CREAM, CategoryID.LIP_GLOSS])
 
-            # 4. Skin Concerns (特定皮肤困扰 - 强制触发功能性单品)
+            # 4. Skin Concerns — force-include functional product categories
             concerns = quiz_data.get("skin_concerns") or []
             if any(c in concerns for c in ["Dark Circles", "Redness/Acne", "Pigmentation"]):
-                priority_category_ids.add(CategoryID.CONCEALER) # 必须有遮瑕
+                priority_category_ids.add(CategoryID.CONCEALER)   # concealer is essential
             if "Dullness" in concerns:
-                priority_category_ids.add(CategoryID.HIGHLIGHTER) # 必须有高光
+                priority_category_ids.add(CategoryID.HIGHLIGHTER)  # highlighter to add radiance
             if "Large Pores" in concerns:
-                excluded_category_ids.add(CategoryID.HIGHLIGHTER) # 绝对不能有高光
-                priority_category_ids.add(CategoryID.POWDER)      # 必须有散粉柔焦
+                excluded_category_ids.add(CategoryID.HIGHLIGHTER)  # highlighter accentuates pores
+                priority_category_ids.add(CategoryID.POWDER)       # blurring powder is essential
 
             # 5. Lip Style (唇妆质地)
             lip_style = quiz_data.get("lip_style")
@@ -189,9 +184,7 @@ class RecommendationMapper:
             elif lip_style == "Fresh & Feminine":
                 priority_category_ids.update([CategoryID.LIP_GLOSS, CategoryID.LIP_STAIN, CategoryID.LIPSTICK])
 
-            # ==========================================
-            # 数据库层面：执行极速黑名单排除
-            # ==========================================
+            # Database layer: apply blacklist exclusions before fetching
             if excluded_category_ids:
                 cosmetics_query = cosmetics_query.filter(
                     ~CosmeticProduct.category_id.in_(list(excluded_category_ids))
@@ -200,29 +193,19 @@ class RecommendationMapper:
         cosmetics_query = cosmetics_query.options(
             joinedload(CosmeticProduct.brand),
             joinedload(CosmeticProduct.category)
-        )
+        ).order_by(func.random())
         
-        # Print the raw SQL query for testing
-        compiled_query = cosmetics_query.statement.compile(
-            compile_kwargs={"literal_binds": True}, 
-            dialect=db.bind.dialect
-        )
-        print(f"==== RAW COSMETICS SQL QUERY ====\n{compiled_query}\n=================================")
-        
-        # ==========================================
-        # 内存层面：数据组装与优先级打标 (Boost & Force Include)
-        # ==========================================
-        cosmetics_by_category = {}
+        # In-memory assembly: group by category (max 5 per category), tag boosted items.
+        cosmetics_by_category: Dict[str, list] = {}
         for product in cosmetics_query.all():
             cat_name = product.category.name
-            cat_id = product.category_id 
-            
+            cat_id = product.category_id
+
             if cat_name not in cosmetics_by_category:
                 cosmetics_by_category[cat_name] = []
-            
+
             if len(cosmetics_by_category[cat_name]) < 5:
-                # 判断当前产品是否命中了用户的“优先/强制”规则
-                is_priority = True if (quiz_data and cat_id in priority_category_ids) else False
+                is_priority = bool(quiz_data and cat_id in priority_category_ids)
 
                 cosmetics_by_category[cat_name].append({
                     "id": product.id,
@@ -233,15 +216,15 @@ class RecommendationMapper:
                     "shade": product.shade_name,
                     "hex": product.hex_code or "",
                     "image_url": product.image_url or "",
-                    "is_priority": is_priority  # 🌟 传给前端用于高亮展示
+                    "is_priority": is_priority,  # passed to frontend for visual highlighting
                 })
 
-        # 扁平化合并
-        cosmetics = []
+        # Flatten category buckets into a single list
+        cosmetics: list = []
         for items in cosmetics_by_category.values():
             cosmetics.extend(items)
 
-        # 🌟 核心排序逻辑：将被 Boost 的产品强制排在推荐列表的最前面
+        # Sort: priority (boosted) products appear first in the recommendation list
         cosmetics.sort(key=lambda x: x["is_priority"], reverse=True)
 
         return {

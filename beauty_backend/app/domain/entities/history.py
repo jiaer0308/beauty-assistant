@@ -28,7 +28,7 @@ class RecommendationSession(Base):
     # Using Enum as suggested by the design spec (requires values_callable to match DB names)
     analysis_type = Column(Enum(AnalysisType, values_callable=lambda obj: [e.value for e in obj]), nullable=False, default=AnalysisType.SCA_SCAN)
     
-    # The season assigned during this session (FK reference until seasons table exists)
+    # The season assigned during this session (FK to seasons.id)
     season_id = Column(Integer, nullable=True)
 
     # Path to the selfie used for this analysis (optional)

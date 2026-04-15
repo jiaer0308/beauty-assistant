@@ -101,8 +101,7 @@ async def analyze_image(
     # 1. Parse & validate quiz_data
     # ------------------------------------------------------------------ #
     try:
-        print(f"==== RAW QUIZ DATA FROM FE ====\n{quiz_data}\n===============================")
-        logger.info(f"Parsing quiz_data: {quiz_data}")
+        logger.info("Parsing quiz_data: %s", quiz_data)
         parsed_quiz = QuizData.model_validate_json(quiz_data)
     except Exception as exc:
         logger.warning("Invalid quiz_data JSON: %s", exc)

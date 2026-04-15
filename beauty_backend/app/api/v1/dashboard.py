@@ -71,7 +71,7 @@ def get_dashboard(
         .join(CosmeticSeasonMapping, CosmeticSeasonMapping.cosmetic_id == CosmeticProduct.id)
         .filter(CosmeticSeasonMapping.season_id == latest_session.season_id)
         .order_by(func.random())
-        .limit(6)
+        .limit(12)
         .all()
     )
 

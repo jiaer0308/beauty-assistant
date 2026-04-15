@@ -10,7 +10,7 @@ final dioProvider = Provider<Dio>((ref) {
   // Allow setting API_URL via --dart-define, otherwise fallback to current IP
   const baseUrl = String.fromEnvironment(
     'API_URL', 
-    defaultValue: 'http://192.168.68.101:8000'
+    defaultValue: 'http://172.20.10.2:8000'
   );
   dio.options.baseUrl = baseUrl; 
   dio.options.connectTimeout = const Duration(seconds: 10);

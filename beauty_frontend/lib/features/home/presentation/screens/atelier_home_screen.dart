@@ -7,6 +7,18 @@ import '../../../camera/data/models/color_analysis_response.dart';
 import '../../../camera/presentation/widgets/product_match_card.dart';
 import '../providers/dashboard_provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/models/auth_state.dart';
+import '../../../auth/presentation/widgets/auth_bottom_sheet.dart';
+
+// ✅ 增加一个简单的 String 扩展，用于处理首字母大写和替换下划线
+extension StringExtension on String {
+  String toTitleCase() {
+    return split('_').map((word) => word.isNotEmpty 
+      ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}' 
+      : '').join(' ');
+  }
+}
 
 class AtelierHomeScreen extends ConsumerWidget {
   const AtelierHomeScreen({super.key});
@@ -41,24 +53,30 @@ class AtelierHomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: dashboardState.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: GlowTheme.deepTaupe),
-        ),
-        error: (error, stack) => _buildEmptyState(context),
-        data: (dashboardData) {
+      body: () {
+        // Show full screen loader only if there's no existing data
+        if (dashboardState.isLoading && !dashboardState.hasValue) {
+          return const Center(
+            child: CircularProgressIndicator(color: GlowTheme.deepTaupe),
+          );
+        } else if (dashboardState.hasError && !dashboardState.hasValue) {
+          return _buildEmptyState(context);
+        } else {
+          final dashboardData = dashboardState.value;
           if (dashboardData != null && dashboardData.result != null) {
-            return _buildDashboard(dashboardData.toColorAnalysisResponse());
+             final isRefreshing = dashboardState.isLoading;
+             return _buildDashboard(dashboardData.toColorAnalysisResponse(), isRefreshing);
           }
           return _buildEmptyState(context);
-        },
-      ),
+        }
+      }()
     );
   }
 
-  Widget _buildDashboard(ColorAnalysisResponse analysisData) {
-    final seasonName = analysisData.result?.displayName ?? 'unknown';
-    
+  Widget _buildDashboard(ColorAnalysisResponse analysisData, bool isRefreshing) {
+    final rawSeasonName = analysisData.result?.displayName ?? 'unknown';
+    final displaySeasonName = rawSeasonName.toTitleCase();
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -70,7 +88,7 @@ class AtelierHomeScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             const OnboardingActionPanel(),
             const SizedBox(height: 40),
-            CuratedGridSection(seasonName: seasonName, analysisData: analysisData),
+            CuratedGridSection(seasonName: displaySeasonName, analysisData: analysisData, isRefreshing: isRefreshing),
             const SizedBox(height: 40),
           ],
         ),
@@ -108,7 +126,7 @@ class AtelierHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.push('/camera'),
+              onPressed: () => context.push('/onboarding'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: GlowTheme.deepTaupe,
                 foregroundColor: GlowTheme.pearlWhite,
@@ -130,6 +148,7 @@ class AtelierHomeScreen extends ConsumerWidget {
     );
   }
 }
+
 class OnboardingActionPanel extends StatelessWidget {
   const OnboardingActionPanel({super.key});
 
@@ -149,12 +168,15 @@ class OnboardingActionPanel extends StatelessWidget {
             children: [
               const Icon(Icons.star_rounded, color: GlowTheme.deepTaupe),
               const SizedBox(width: 8),
-              Text(
-                'Complete Your Profile',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: GlowTheme.deepTaupe,
+              Expanded(
+                child: Text(
+                  'Complete Your Profile',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: GlowTheme.deepTaupe,
+                  ),
+                  softWrap: true,
                 ),
               ),
             ],
@@ -194,21 +216,24 @@ class OnboardingActionPanel extends StatelessWidget {
     );
   }
 }
+
 class HeroIdentityCard extends StatelessWidget {
   final ColorAnalysisResponse? analysisData;
   const HeroIdentityCard({super.key, this.analysisData});
 
   @override
   Widget build(BuildContext context) {
-    final seasonName = analysisData?.result?.displayName ?? 'unknown';
-    final seasonColor = SeasonTheme.getSeasonColor(seasonName);
+    final rawSeasonName = analysisData?.result?.displayName ?? 'unknown';
+    final seasonColor = SeasonTheme.getSeasonColor(rawSeasonName); 
+    final displaySeasonName = rawSeasonName.toTitleCase();
+
     return Container(
       width: double.infinity,
-      height: 400,
+      height: 250,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: GlowTheme.oatmeal,
+        color: seasonColor,
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -245,7 +270,7 @@ class HeroIdentityCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  seasonName,
+                  displaySeasonName, 
                   style: GoogleFonts.playfairDisplay(
                     color: Colors.white,
                     fontSize: 36,
@@ -254,7 +279,6 @@ class HeroIdentityCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-            
               ],
             ),
           ),
@@ -264,31 +288,61 @@ class HeroIdentityCard extends StatelessWidget {
   }
 }
 
-class CuratedGridSection extends StatelessWidget {
+class CuratedGridSection extends ConsumerWidget {
   final String seasonName;
   final ColorAnalysisResponse? analysisData;
-  
+  final bool isRefreshing;
+
   const CuratedGridSection({
-    super.key, 
+    super.key,
     required this.seasonName,
     this.analysisData,
+    this.isRefreshing = false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
     final products = analysisData?.recommendedProducts ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Curated for $seasonName',
-          style: GoogleFonts.playfairDisplay(
-            color: GlowTheme.deepTaupe,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                'Curated for $seasonName',
+                style: GoogleFonts.playfairDisplay(
+                  color: GlowTheme.deepTaupe,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              child: isRefreshing 
+                ? const SizedBox(
+                    width: 20, 
+                    height: 20, 
+                    child: CircularProgressIndicator(
+                      color: GlowTheme.deepTaupe, 
+                      strokeWidth: 2
+                    )
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.refresh_rounded, color: GlowTheme.deepTaupe),
+                    tooltip: 'Refresh recommendations',
+                    onPressed: () => ref.read(dashboardProvider.notifier).refresh(),
+                  ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8), // 缩减了一点点间距，因为 Button 自身带有 padding
         Container(
           height: 1,
           width: 80,
@@ -303,25 +357,48 @@ class CuratedGridSection extends StatelessWidget {
             ),
           )
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.52,
-            ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              return ProductMatchCard(
-                product: products[index],
-                onTap: () => context.push('/ar-tryon', extra: {
-                  'dashboardProducts': products,
-                  'selectedId': products[index].id,
-                }),
-              );
-            },
+          Stack(
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: isRefreshing ? 0.3 : 1.0,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.52,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                      return ProductMatchCard(
+                        product: products[index],
+                        onTap: () {
+                          if (authState.status == AuthStatus.authenticated) {
+                            context.push('/ar-tryon', extra: {
+                              'dashboardProducts': products,
+                              'selectedId': products[index].id,
+                            });
+                          } else {
+                            AuthBottomSheet.show(
+                              context,
+                              isMandatory: true,
+                              onSuccess: () {
+                                context.push('/ar-tryon', extra: {
+                                  'dashboardProducts': products,
+                                  'selectedId': products[index].id,
+                                });
+                              },
+                            );
+                          }
+                        },
+                      );
+                    },
+                ),
+              ),
+            ],
           ),
       ],
     );

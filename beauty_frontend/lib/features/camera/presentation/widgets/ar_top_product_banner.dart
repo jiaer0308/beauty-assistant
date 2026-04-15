@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../ar_tryon/data/models/ar_shade_model.dart';
+import '../../../favorites/presentation/providers/favorites_provider.dart';
 
 /// Top-of-screen banner that shows the currently active shade's brand and
 /// product details inside the AR Try-On view.
@@ -8,7 +10,7 @@ import '../../../ar_tryon/data/models/ar_shade_model.dart';
 /// Accepts a nullable [selectedShade]. When null (initial loading) the text
 /// areas are replaced by subtle oatmeal-tinted placeholders that blend
 /// naturally into the Cashmere Cream design system without any hard spinner.
-class ArTopProductBanner extends StatelessWidget {
+class ArTopProductBanner extends ConsumerWidget {
   final ArShadeModel? selectedShade;
 
   const ArTopProductBanner({
@@ -17,7 +19,13 @@ class ArTopProductBanner extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoritesState = ref.watch(favoritesProvider);
+    final cosmeticId = selectedShade?.cosmeticId ?? selectedShade?.productId ?? 0;
+    
+    final isFavorited = selectedShade != null &&
+        favoritesState.value?.items.any((e) => e.id == cosmeticId) == true;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -37,17 +45,23 @@ class ArTopProductBanner extends StatelessWidget {
                     ? _buildLoadingState()
                     : _buildShadeInfo(selectedShade!),
               ),
-              IconButton(
-                onPressed: () {
-                  // TODO: Toggle favourite
-                },
-                icon: const Icon(
-                  Icons.favorite_border,
-                  color: GlowTheme.deepTaupe,
+              if (selectedShade != null)
+                IconButton(
+                  onPressed: () {
+                    final notifier = ref.read(favoritesProvider.notifier);
+                    if (isFavorited) {
+                      notifier.removeFavorite(cosmeticId);
+                    } else {
+                      notifier.addFavorite(cosmeticId);
+                    }
+                  },
+                  icon: Icon(
+                    isFavorited ? Icons.favorite : Icons.favorite_border,
+                    color: GlowTheme.deepTaupe,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
             ],
           ),
         ),

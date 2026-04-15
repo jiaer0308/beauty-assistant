@@ -67,10 +67,26 @@ class AuthInterceptor extends Interceptor {
           '[AuthInterceptor] 401 Unauthorized for ${err.requestOptions.path}',
           name: 'AuthInterceptor');
 
+      // ── Never auto-recover on auth endpoints — their 401/400 responses
+      // carry deliberate error messages (e.g. "Incorrect email or password")
+      // that must reach the UI intact.
+      const _authPaths = [
+        '/api/v1/auth/login',
+        '/api/v1/auth/register',
+        '/api/v1/auth/forgot-password',
+        '/api/v1/auth/reset-password',
+      ];
+      if (_authPaths.any((p) => err.requestOptions.path.contains(p))) {
+        dev.log('[AuthInterceptor] Auth endpoint 401 — passing through without retry.',
+            name: 'AuthInterceptor');
+        return handler.next(err);
+      }
+
       // Only attempt auto-recovery when the user was in guest mode
       // (no JWT present, meaning we were relying on X-Guest-Token).
       final jwt = await _tokenStorage.getToken();
       final oldGuestToken = await _tokenStorage.getGuestToken();
+
 
       if (jwt == null && oldGuestToken != null) {
         dev.log(

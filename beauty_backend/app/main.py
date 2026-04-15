@@ -68,15 +68,29 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# CORS — allow the Flutter dev emulator and any production origin
+# CORS — restrict to known origins.
+# Defaults to localhost and the Android emulator address for development.
+# Set ALLOWED_ORIGINS in .env for production (comma-separated list).
 # ---------------------------------------------------------------------------
+
+_allowed_origins = getattr(settings, "allowed_origins", None)
+if _allowed_origins:
+    # Support comma-separated string (e.g. "https://app.example.com,https://admin.example.com")
+    cors_origins = [o.strip() for o in _allowed_origins.split(",") if o.strip()]
+else:
+    # Safe development defaults — never use "*" in production
+    cors_origins = [
+        "http://localhost:8000",
+        "http://localhost:3000",
+        "http://10.0.2.2:8000",  # Android emulator → host loopback
+    ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # tighten in production
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Guest-Token"],
 )
 
 # ---------------------------------------------------------------------------

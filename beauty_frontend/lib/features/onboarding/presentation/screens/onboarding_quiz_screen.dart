@@ -5,12 +5,34 @@ import '../../../../core/theme/glow_theme.dart';
 import '../widgets/quiz_progress_bar.dart';
 import '../widgets/quiz_step_layout.dart';
 import '../onboarding_controller.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/models/auth_state.dart';
 
-class OnboardingQuizScreen extends ConsumerWidget {
+class OnboardingQuizScreen extends ConsumerStatefulWidget {
   const OnboardingQuizScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OnboardingQuizScreen> createState() => _OnboardingQuizScreenState();
+}
+
+class _OnboardingQuizScreenState extends ConsumerState<OnboardingQuizScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = ref.read(authProvider);
+      // Only skip if the user is fully authenticated with a real JWT.
+      // For guest or unauthenticated, always create a fresh guest session.
+      // This prevents 401 errors caused by stale guest tokens in storage.
+      if (authState.status != AuthStatus.authenticated) {
+        ref.read(authProvider.notifier).loginAsGuest();
+      }
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
     final pageController = PageController(initialPage: state.currentPage);

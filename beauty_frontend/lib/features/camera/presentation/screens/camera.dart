@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/glow_theme.dart';
@@ -17,11 +17,70 @@ class CameraScreen extends StatefulWidget {
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
   final ImagePicker _picker = ImagePicker();
+  CameraController? _controller;
+  bool _cameraReady = false;
+  FlashMode _flashMode = FlashMode.off;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Initialize front camera by default
+    _initCamera(CameraLensDirection.front);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (state == AppLifecycleState.inactive) {
+      _controller?.dispose();
+      _cameraReady = false;
+      if (mounted) setState(() {});
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera(_controller!.description.lensDirection);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initCamera(CameraLensDirection direction) async {
+    final cameras = await availableCameras();
+    if (cameras.isEmpty) return;
+
+    final camera = cameras.firstWhere(
+      (c) => c.lensDirection == direction,
+      orElse: () => cameras.first,
+    );
+
+    final controller = CameraController(
+      camera,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
+
+    final oldController = _controller;
+    if (oldController != null) {
+      await oldController.dispose();
+    }
+
+    await controller.initialize();
+    await controller.setFlashMode(_flashMode);
+
+    if (!mounted) return;
+    setState(() {
+      _controller = controller;
+      _cameraReady = true;
+    });
+  }
 
   Future<void> _pickGalleryImage() async {
-    // Triggers ImagePicker().pickImage(source: ImageSource.gallery)
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null && mounted) {
       context.push(
@@ -29,154 +88,184 @@ class _CameraScreenState extends State<CameraScreen> {
         extra: {
           'imagePath': image.path,
           'quizData': widget.quizData,
+          'isMirrored': false,
         },
       );
     }
   }
 
+  Future<void> _takePhoto() async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    try {
+      final XFile image = await _controller!.takePicture();
+      final isFront = _controller!.description.lensDirection == CameraLensDirection.front;
+      if (!mounted) return;
+      context.push(
+        '/photo-preview',
+        extra: {
+          'imagePath': image.path,
+          'quizData': widget.quizData,
+          'isMirrored': isFront,
+        },
+      );
+    } catch (e) {
+      debugPrint('Error taking photo: $e');
+    }
+  }
+
+  void _switchCamera() async {
+    if (_controller == null) return;
+    final direction = _controller!.description.lensDirection;
+    final newDirection = direction == CameraLensDirection.front
+        ? CameraLensDirection.back
+        : CameraLensDirection.front;
+    
+    setState(() => _cameraReady = false);
+    await _initCamera(newDirection);
+  }
+
+  void _toggleFlash() async {
+    if (_controller == null) return;
+    final newMode = _flashMode == FlashMode.off ? FlashMode.always : FlashMode.off;
+    await _controller!.setFlashMode(newMode);
+    setState(() {
+      _flashMode = newMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GlowTheme.pearlWhite,
-      body: CameraAwesomeBuilder.custom(
-        saveConfig: SaveConfig.photo(),
-        onMediaCaptureEvent: (MediaCapture mediaCapture) {
-          if (mediaCapture.status == MediaCaptureStatus.success && mediaCapture.isPicture) {
-            context.push(
-              '/photo-preview',
-              extra: {
-                'imagePath': mediaCapture.captureRequest.path,
-                'quizData': widget.quizData,
-              },
-            );
-          }
-        },
-        builder: (CameraState cameraState, AnalysisPreview preview) {
-          return Stack(
-            children: [
-              // Center Visual: Dashed Oval
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: DashedOvalPainter(color: GlowTheme.champagneGold),
-                ),
-              ),
-              
-              // Top Header
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        color: GlowTheme.deepTaupe,
-                        onPressed: () => context.pop(),
-                      ),
-                      StreamBuilder<FlashMode>(
-                        stream: cameraState.sensorConfig.flashMode$,
-                        builder: (context, snapshot) {
-                          final flashMode = snapshot.data ?? FlashMode.none;
-                          bool isFlashOn = flashMode == FlashMode.always || flashMode == FlashMode.on;
-                          return IconButton(
-                            icon: Icon(isFlashOn ? Icons.flash_on : Icons.flash_off),
-                            color: GlowTheme.deepTaupe,
-                            onPressed: () {
-                              cameraState.sensorConfig.setFlashMode(
-                                isFlashOn ? FlashMode.none : FlashMode.always,
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ── Camera Preview ──
+          if (_cameraReady && _controller != null && _controller!.value.isInitialized)
+            ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.center,
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    // Swap width/height: sensor is landscape; display is portrait.
+                    width:  _controller!.value.previewSize!.height,
+                    height: _controller!.value.previewSize!.width,
+                    child:  CameraPreview(_controller!),
                   ),
                 ),
               ),
+            )
+          else
+            const Center(child: CircularProgressIndicator(color: GlowTheme.champagneGold)),
 
-              // Bottom Footer Section
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 48.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Scan Face',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: GlowTheme.deepTaupe,
+          // Center Visual: Dashed Oval
+          Positioned.fill(
+            child: CustomPaint(
+              painter: DashedOvalPainter(color: GlowTheme.champagneGold),
+            ),
+          ),
+          
+          // Top Header
+          Align(
+            alignment: Alignment.topCenter,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      color: Colors.white,
+                      onPressed: () => context.pop(),
+                    ),
+                    IconButton(
+                      icon: Icon(_flashMode == FlashMode.always ? Icons.flash_on : Icons.flash_off),
+                      color: Colors.white,
+                      onPressed: _toggleFlash,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom Footer Section
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 48.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Scan Face',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Center face for scan.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Left: Gallery
+                        IconButton(
+                          icon: const Icon(Icons.photo_library_outlined, size: 28),
+                          color: Colors.white,
+                          onPressed: _pickGalleryImage,
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Center face for scan.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.normal,
-                          color: GlowTheme.deepTaupe,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Left: Gallery
-                            IconButton(
-                              icon: const Icon(Icons.photo_library_outlined, size: 28),
-                              color: GlowTheme.oatmeal,
-                              onPressed: _pickGalleryImage,
+                        
+                        // Center: Shutter
+                        GestureDetector(
+                          onTap: _takePhoto,
+                          child: Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 4),
                             ),
-                            
-                            // Center: Shutter
-                            GestureDetector(
-                              onTap: () {
-                                cameraState.when(
-                                  onPhotoMode: (photoState) => photoState.takePhoto(),
-                                );
-                              },
+                            child: Center(
                               child: Container(
-                                width: 80,
-                                height: 80,
-                                decoration: BoxDecoration(
+                                width: 64,
+                                height: 64,
+                                decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 4),
-                                ),
-                                child: Center(
-                                  child: Container(
-                                    width: 64,
-                                    height: 64,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: GlowTheme.champagneGold,
-                                    ),
-                                  ),
+                                  color: GlowTheme.champagneGold,
                                 ),
                               ),
                             ),
-                            
-                            // Right: Flip Camera
-                            IconButton(
-                              icon: const Icon(Icons.flip_camera_ios, size: 28),
-                              color: GlowTheme.oatmeal,
-                              onPressed: () {
-                                cameraState.switchCameraSensor();
-                              },
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                        
+                        // Right: Flip Camera
+                        IconButton(
+                          icon: const Icon(Icons.flip_camera_ios, size: 28),
+                          color: Colors.white,
+                          onPressed: _switchCamera,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

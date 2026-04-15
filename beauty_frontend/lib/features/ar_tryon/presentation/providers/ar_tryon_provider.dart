@@ -29,6 +29,8 @@ final arTryonProvider =
 /// 2. **Dashboard Mode** (`product` provided, no `recommendations`): the
 ///    single selected product is displayed first; hex codes for all products
 ///    are fetched from `/api/v1/cosmetics/shades` if IDs are available.
+
+
 class ArTryonNotifier extends StateNotifier<ArTryonState> {
   final CosmeticRepository _cosmeticRepo;
   
@@ -172,6 +174,7 @@ class ArTryonNotifier extends StateNotifier<ArTryonState> {
       _categorisedShades[category]!.add(ArShadeModel(
         id: 'session_${item.id}_$idx',
         productId: item.id,
+        cosmeticId: item.id,
         brandName: 'Recommended',
         productName: item.productName,
         shadeName: item.shadeName,
@@ -222,6 +225,7 @@ class ArTryonNotifier extends StateNotifier<ArTryonState> {
           final dynamicShade = ArShadeModel(
             id: 'dash_${item.id}_${DateTime.now().millisecondsSinceEpoch}',
             productId: product.id,
+            cosmeticId: item.id,
             brandName: product.brand,
             productName: item.productName,
             shadeName: item.shadeName,
@@ -241,6 +245,7 @@ class ArTryonNotifier extends StateNotifier<ArTryonState> {
         final dynamicShade = ArShadeModel(
           id: 'dash_${product.id}_${DateTime.now().millisecondsSinceEpoch}',
           productId: product.id,
+          cosmeticId: product.id,
           brandName: product.brand,
           productName: product.name,
           shadeName: product.shade,

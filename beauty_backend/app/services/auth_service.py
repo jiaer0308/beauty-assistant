@@ -8,10 +8,15 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+import logging
 
 from app.domain.entities.user import User
 from app.schemas.user import UserOut
 from app.core.security import get_password_hash, verify_password
+
+logger = logging.getLogger(__name__)
+from app.core.config import settings
+from app.services.email_service import EmailService
 
 
 class AuthService:
@@ -127,43 +132,62 @@ class AuthService:
         return UserOut.model_validate(db_user)
 
     @staticmethod
-    def forgot_password(db: Session, email: str) -> str:
+    def forgot_password(db: Session, email: str) -> Optional[str]:
         """
-        Generates a password reset token for a user.
-        
+        Generates a password reset token if the given email belongs to a
+        registered (non-guest) account.
+
+        Security note
+        -------------
+        This method intentionally returns ``None`` instead of raising an
+        exception when the email is unknown or belongs to a guest.  The
+        caller should **always** respond with a generic 200 message so
+        that attackers cannot enumerate registered addresses.
+
         Args:
             db (Session): Database session
-            email (str): User's email address
-            
+            email (str): Email address submitted by the user
+
         Returns:
-            str: The generated reset token
-            
-        Raises:
-            HTTPException: If user not found, or is a guest
+            str: A one-hour reset token (caller must deliver it to the user)
+            None: If the email is unknown or belongs to a guest user
         """
+        import smtplib
+
         db_user = db.query(User).filter(User.email == email).first()
+
+        # Silently return if the user does not exist or is a guest.
+        # This prevents user-enumeration attacks — the API always returns 200.
         if not db_user or db_user.is_guest:
-            # For security, we might want to return 200 even if the email doesn't exist.
-            # However, for this implementation, we will raise an error so the frontend
-            # knows the email is invalid.
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found or is a guest"
-            )
-            
+            logger.info("forgot_password: no registered account for email (not disclosed to caller)")
+            return None
+
+        # Generate a cryptographically random token and 1-hour expiry
         reset_token = str(uuid.uuid4())
-        # Set expiration to 1 hour from now
         expires = datetime.now(timezone.utc) + timedelta(hours=1)
-        
+
         db_user.reset_password_token = reset_token
         db_user.reset_password_expires = expires
-        
         db.add(db_user)
         db.commit()
-        
-        # In a real environment, this token would be EMAILED to the user.
-        # Since we have no email infrastructure, returning the token directly.
-        return reset_token
+
+        # Build the reset deep-link: beautyassistant://reset-password?token=<uuid>
+        # FRONTEND_URL already contains the full path e.g. "beautyassistant://reset-password"
+        reset_link = f"{settings.frontend_url}?token={reset_token}"
+
+        # Send the email — log the error but do NOT crash the request
+        try:
+            EmailService.send_reset_password_email(
+                to_email=db_user.email,
+                reset_link=reset_link,
+            )
+        except smtplib.SMTPException:
+            # SMTP failure is logged inside EmailService._send().
+            # We raise a 500 so the frontend knows to prompt the user to retry.
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send reset email. Please try again later.",
+            )
 
     @staticmethod
     def reset_password(db: Session, token: str, new_password: str) -> UserOut:

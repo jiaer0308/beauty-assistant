@@ -48,6 +48,17 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     log_format: str = "json"
     
+    # ── Email (SMTP) ──────────────────────────────────────────────────────────
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from_name: str = "Beauty Assistant"
+    smtp_from_email: str = ""
+
+    # Frontend URL — used to build the reset-password link sent in emails
+    frontend_url: str = "http://localhost:3000"
+
     # Paths
     base_dir: Path = Path(__file__).parent.parent.parent
     upload_dir: Path = base_dir / "uploads"

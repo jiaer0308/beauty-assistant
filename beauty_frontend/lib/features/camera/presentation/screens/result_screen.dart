@@ -34,7 +34,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> with TickerProvider
     // Progress animation (simulating API wait time visually while waiting for the real response)
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4), // Visual minimum wait
+      duration: const Duration(seconds: 9), // Visual minimum wait
     );
 
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(

@@ -12,6 +12,9 @@ class ArShadeModel {
   /// Hex color string including the '#' prefix, e.g. '#B5453A'.
   final String colorHex;
 
+  /// The specific Database ID of this cosmetic shade for favorites.
+  final int? cosmeticId;
+
   /// The ID of the parent product this shade belongs to.
   final int? productId;
 
@@ -26,6 +29,7 @@ class ArShadeModel {
     required this.shadeName,
     required this.colorHex,
     this.productId,
+    this.cosmeticId,
     this.isBestColor = false,
   });
 
@@ -36,6 +40,7 @@ class ArShadeModel {
     String? shadeName,
     String? colorHex,
     int? productId,
+    int? cosmeticId,
     bool? isBestColor,
   }) {
     return ArShadeModel(
@@ -45,6 +50,7 @@ class ArShadeModel {
       shadeName: shadeName ?? this.shadeName,
       colorHex: colorHex ?? this.colorHex,
       productId: productId ?? this.productId,
+      cosmeticId: cosmeticId ?? this.cosmeticId,
       isBestColor: isBestColor ?? this.isBestColor,
     );
   }

@@ -9,7 +9,12 @@ class TokenStorageService {
   final FlutterSecureStorage _storage;
 
   TokenStorageService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+      : _storage = storage ?? const FlutterSecureStorage(
+        aOptions: AndroidOptions(
+          encryptedSharedPreferences: true,
+          resetOnError: true,
+        ),
+      );
 
   static const String _tokenKey = 'auth_token';
   static const String _guestTokenKey = 'guest_token';

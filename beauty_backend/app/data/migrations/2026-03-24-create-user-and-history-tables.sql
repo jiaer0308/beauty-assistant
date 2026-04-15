@@ -67,3 +67,13 @@ ALTER TABLE `recommendation_sessions`
 DROP COLUMN `image_path`;
 
 ALTER TABLE `recommendation_sessions` ADD COLUMN `image_path` VARCHAR(255) NULL;
+
+
+CREATE TABLE IF NOT EXISTS user_favorite_cosmetics (
+    user_id INT(11) NOT NULL,
+    cosmetic_id INT(11) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, cosmetic_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (cosmetic_id) REFERENCES cosmetic_products(id) ON DELETE CASCADE
+);

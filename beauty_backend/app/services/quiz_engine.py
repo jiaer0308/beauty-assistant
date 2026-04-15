@@ -188,9 +188,18 @@ def _clamp(value: float, lo: float = 0.0, hi: float = 1.0) -> float:
 
 
 def _normalise(scores: Dict[str, float]) -> Dict[str, float]:
+    """
+    Normalise a score dict so values sum to 1.0 (probability distribution).
+
+    Sum-normalisation is used rather than max-normalisation so that the
+    relative gaps between seasons are preserved — a dominant season with
+    0.9 vs. 0.1 for all others is immediately distinguishable from a
+    near-tie at 0.18 vs 0.16.
+    """
     if not scores:
         return {}
-    max_val = max(scores.values())
-    if max_val == 0:
+    total = sum(scores.values())
+    if total == 0:
         return {k: 0.0 for k in scores}
-    return {k: v / max_val for k, v in scores.items()}
+    return {k: v / total for k, v in scores.items()}
+

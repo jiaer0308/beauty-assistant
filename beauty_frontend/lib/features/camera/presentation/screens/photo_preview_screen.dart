@@ -6,11 +6,13 @@ import '../../../../core/theme/glow_theme.dart';
 class PhotoPreviewScreen extends StatelessWidget {
   final String? imagePath;
   final Map<String, dynamic>? quizData;
+  final bool isMirrored;
 
   const PhotoPreviewScreen({
     super.key,
     this.imagePath,
     this.quizData,
+    this.isMirrored = false,
   });
 
   @override
@@ -139,11 +141,15 @@ class PhotoPreviewScreen extends StatelessWidget {
 
   Widget _buildBackgroundImage() {
     if (imagePath != null && imagePath!.isNotEmpty) {
-      return Image.file(
+      Widget imageWidget = Image.file(
         File(imagePath!),
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
       );
+      if (isMirrored) {
+        return Transform.flip(flipX: true, child: imageWidget);
+      }
+      return imageWidget;
     } else {
       return _buildPlaceholder();
     }

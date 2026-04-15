@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/glow_theme.dart';
 import '../../../auth/presentation/widgets/auth_bottom_sheet.dart';
+import '../../../../features/auth/models/auth_state.dart';
+import '../../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../data/models/color_analysis_response.dart';
 import '../widgets/result_hero_section.dart';
 import '../widgets/color_swatch_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/product_match_card.dart';
 import '../widgets/sticky_ar_footer.dart';
-import 'package:beauty_assistant/features/auth/presentation/providers/auth_provider.dart';
-import 'package:beauty_assistant/features/auth/models/auth_state.dart';
 
 class ResultDashboardScreen extends ConsumerWidget {
   final ColorAnalysisResponse? analysisData;
@@ -156,16 +156,33 @@ class ResultDashboardScreen extends ConsumerWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16.0,
                     mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.55, // Adjusted to allow more height for text
+                    childAspectRatio: 0.55,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     return ProductMatchCard(
                       product: products[index],
-                      onTap: () => context.push('/ar-tryon', extra: {
-                        'dashboardProducts': products,
-                        'selectedId': products[index].id,
-                      }),
+                      onTap: () {
+                        if (authState.status == AuthStatus.authenticated) {
+                          context.push('/ar-tryon', extra: {
+                            'dashboardProducts': products,
+                            'selectedId': products[index].id,
+                          });
+                        } else {
+                          AuthBottomSheet.show(
+                            context,
+                            discoveredSeason: displayName,
+                            isMandatory: true,
+                            onSuccess: () {
+                              context.push('/ar-tryon', extra: {
+                                'dashboardProducts': products,
+                                'selectedId': products[index].id,
+                                'isNewUserFlow': true,
+                              });
+                            },
+                          );
+                        }
+                      },
                     );
                   },
                 ),
@@ -192,15 +209,28 @@ class ResultDashboardScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: StickyArFooter(
+        label: authState.status == AuthStatus.authenticated
+            ? 'To Home Page'
+            : 'Try AR Makeup',
+        buttonColor: authState.status == AuthStatus.authenticated
+            ? GlowTheme.deepTaupe
+            : null, // defaults to champagneGold
+        foregroundColor: authState.status == AuthStatus.authenticated
+            ? GlowTheme.pearlWhite
+            : null,
         onPressed: () {
           if (authState.status == AuthStatus.authenticated) {
-            context.push('/ar-tryon', extra: {'sessionId': data.sessionId});
+            context.go('/dashboard');
           } else {
             AuthBottomSheet.show(
-              context, 
+              context,
               discoveredSeason: displayName,
+              isMandatory: true,
               onSuccess: () {
-                context.push('/ar-tryon', extra: {'sessionId': data.sessionId});
+                context.push('/ar-tryon', extra: {
+                  'sessionId': data.sessionId,
+                  'isNewUserFlow': true,
+                });
               },
             );
           }

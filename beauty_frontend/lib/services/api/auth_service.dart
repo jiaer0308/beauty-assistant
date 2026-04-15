@@ -42,11 +42,12 @@ class AuthService {
   }) async {
     final response = await _dio.post(
       '/api/v1/auth/login',
-      data: FormData.fromMap({
+      data: {
         'username': email,
         'password': password,
         'grant_type': 'password',
-      }),
+      },
+      options: Options(contentType: Headers.formUrlEncodedContentType),
     );
     return response.data;
   }
@@ -58,6 +59,30 @@ class AuthService {
       options: Options(
         headers: {'Authorization': 'Bearer $token'},
       ),
+    );
+    return response.data;
+  }
+
+  /// Request a password reset email. Always returns 200 (generic message).
+  Future<Map<String, dynamic>> forgotPassword({required String email}) async {
+    final response = await _dio.post(
+      '/api/v1/auth/forgot-password',
+      data: {'email': email},
+    );
+    return response.data;
+  }
+
+  /// Reset password with a one-time token received via email.
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    final response = await _dio.post(
+      '/api/v1/auth/reset-password',
+      data: {
+        'token': token,
+        'new_password': newPassword,
+      },
     );
     return response.data;
   }
